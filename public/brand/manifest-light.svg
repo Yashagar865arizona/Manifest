@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 44" width="192" height="44" role="img" aria-label="Manifest">
+  <title>Manifest</title>
+  <!--
+    Manifest wordmark — light variant
+    For use on: dark / navy / charcoal backgrounds
+    Font: Geist (600 semibold), fallback Inter / system sans
+    Color: #F8FAFC (slate-50)
+  -->
+  <text
+    x="0"
+    y="32"
+    font-family="Geist, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="30"
+    font-weight="600"
+    letter-spacing="-0.6"
+    fill="#F8FAFC"
+  >Manifest</text>
+</svg>

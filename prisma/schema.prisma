@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships  WorkspaceMember[]
+  checkIns     CheckIn[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  timezone    String   @default("UTC")
+  checkInTime String   @default("09:00") // HH:MM in workspace timezone
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members       WorkspaceMember[]
+  checkIns      CheckIn[]
+  synthesisRuns SynthesisReport[]
+  weeklyReports WeeklyReport[]
+  subscription  Subscription?
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id                  String       @id @default(cuid())
+  workspaceId         String
+  userId              String?
+  invitedEmail        String
+  inviteToken         String       @unique @default(cuid())
+  role                MemberRole   @default(MEMBER)
+  status              InviteStatus @default(PENDING)
+  checkInTimeOverride String?
+  joinedAt            DateTime?
+  createdAt           DateTime     @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User?     @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, invitedEmail])
+  @@map("workspace_members")
+}
+
+model CheckIn {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  content     String   @db.Text
+  checkInDate String   // YYYY-MM-DD
+  submittedAt DateTime @default(now())
+  token       String   @unique @default(cuid()) // one-click check-in link token
+  tokenUsed   Boolean  @default(false)
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId, checkInDate])
+  @@map("check_ins")
+}
+
+model SynthesisReport {
+  id             String   @id @default(cuid())
+  workspaceId    String
+  reportDate     String   // YYYY-MM-DD
+  reportText     String   @db.Text // AI-generated narrative for managers
+  structuredData Json     // parsed flags, anomalies, confidence scores
+  createdAt      DateTime @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, reportDate])
+  @@map("synthesis_reports")
+}
+
+model WeeklyReport {
+  id          String    @id @default(cuid())
+  workspaceId String
+  weekEnding  String    // YYYY-MM-DD (Friday)
+  reportText  String    @db.Text
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, weekEnding])
+  @@map("weekly_reports")
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  workspaceId          String    @unique
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String?
+  plan                 Plan      @default(TRIAL)
+  status               SubStatus @default(TRIALING)
+  seatLimit            Int       @default(10)
+  trialEndsAt          DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@map("waitlist_entries")
+}
+
+enum MemberRole {
+  MANAGER
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  GROWTH
+  SCALE
+}
+
+enum SubStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}

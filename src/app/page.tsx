@@ -265,6 +265,389 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── How it works ───────────────────────────────────────────── */}
+      <section
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          maxWidth: "var(--content-max-width)",
+          margin: "0 auto",
+          padding: "64px 24px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-widest)",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            marginBottom: "40px",
+          }}
+        >
+          How it works
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: "0",
+          }}
+        >
+          {[
+            {
+              step: "01",
+              title: "Connect your tools",
+              body: "Link Slack, GitHub, Jira, or Google Calendar. Takes under 10 minutes. No agents to install, no IT tickets.",
+            },
+            {
+              step: "02",
+              title: "Map your org",
+              body: "Import your team structure from a CSV or build it in Manifest. Employees are grouped by team, reporting line, and role.",
+            },
+            {
+              step: "03",
+              title: "Get your daily brief",
+              body: "Every morning, your intelligence report is ready. Exceptions only — people who are blocked, burning out, or going quiet.",
+            },
+          ].map((s, i) => (
+            <div
+              key={s.step}
+              style={{
+                padding: "32px",
+                borderLeft: i > 0 ? "1px solid var(--border-default)" : undefined,
+                borderTop: "1px solid var(--border-default)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "var(--font-size-xs)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  letterSpacing: "var(--letter-spacing-widest)",
+                  color: "var(--text-accent)",
+                  marginBottom: "16px",
+                  textTransform: "uppercase",
+                }}
+              >
+                {s.step}
+              </p>
+              <h3
+                style={{
+                  fontSize: "var(--font-size-lg)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  letterSpacing: "var(--letter-spacing-tight)",
+                  margin: "0 0 10px",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {s.title}
+              </h3>
+              <p
+                style={{
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--text-secondary)",
+                  lineHeight: "var(--line-height-relaxed)",
+                  margin: 0,
+                }}
+              >
+                {s.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Role views ─────────────────────────────────────────────── */}
+      <section
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          maxWidth: "var(--content-max-width)",
+          margin: "0 auto",
+          padding: "64px 24px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-widest)",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            marginBottom: "8px",
+          }}
+        >
+          Built for every layer
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
+            fontWeight: "var(--font-weight-bold)",
+            letterSpacing: "var(--letter-spacing-tight)",
+            margin: "0 0 40px",
+            color: "var(--text-primary)",
+          }}
+        >
+          One platform. Three views.
+        </h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {[
+            {
+              role: "Executive / CEO",
+              badge: "Exec",
+              hook: "Org-wide health at a glance",
+              signals: [
+                "Burnout risk by department",
+                "Top performers vs. coasters",
+                "Retention risk flags — 3 weeks before someone quits",
+                "Cross-team bottlenecks visible before they escalate",
+              ],
+            },
+            {
+              role: "Manager",
+              badge: "Manager",
+              hook: "Only the exceptions, nothing else",
+              signals: [
+                "Who is blocked and hasn't surfaced it",
+                "Velocity drops after consecutive missed targets",
+                "Quiet signals — check-in quality declining over time",
+                "Team-level delivery summary, daily",
+              ],
+            },
+            {
+              role: "HR / People Ops",
+              badge: "HR",
+              hook: "Evidence-based, not opinion-based",
+              signals: [
+                "Workload imbalance across teams",
+                "Onboarding velocity for new hires",
+                "Consistent over-delivery without recognition",
+                "Systematic blockers that signal org dysfunction",
+              ],
+            },
+          ].map((r) => (
+            <div
+              key={r.role}
+              style={{
+                padding: "28px",
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-default)",
+                borderRadius: "var(--radius-xl)",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "3px 10px",
+                  background: "var(--bg-base)",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: "var(--radius-full)",
+                  fontSize: "var(--font-size-xs)",
+                  fontWeight: "var(--font-weight-medium)",
+                  color: "var(--text-muted)",
+                  marginBottom: "16px",
+                  letterSpacing: "var(--letter-spacing-wide)",
+                  textTransform: "uppercase",
+                }}
+              >
+                {r.badge}
+              </div>
+              <h3
+                style={{
+                  fontSize: "var(--font-size-base)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  margin: "0 0 6px",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {r.hook}
+              </h3>
+              <p
+                style={{
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--text-muted)",
+                  margin: "0 0 20px",
+                }}
+              >
+                {r.role}
+              </p>
+              <ul style={{ margin: 0, padding: "0 0 0 0", listStyle: "none" }}>
+                {r.signals.map((s) => (
+                  <li
+                    key={s}
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "flex-start",
+                      fontSize: "var(--font-size-sm)",
+                      color: "var(--text-secondary)",
+                      lineHeight: "var(--line-height-relaxed)",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <span style={{ color: "var(--text-accent)", flexShrink: 0, marginTop: "2px" }}>→</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Pricing ────────────────────────────────────────────────── */}
+      <section
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          maxWidth: "var(--content-max-width)",
+          margin: "0 auto",
+          padding: "64px 24px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-widest)",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            marginBottom: "8px",
+          }}
+        >
+          Pricing
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
+            fontWeight: "var(--font-weight-bold)",
+            letterSpacing: "var(--letter-spacing-tight)",
+            margin: "0 0 8px",
+            color: "var(--text-primary)",
+          }}
+        >
+          Simple per-seat pricing.
+        </h2>
+        <p
+          style={{
+            fontSize: "var(--font-size-base)",
+            color: "var(--text-secondary)",
+            margin: "0 0 40px",
+          }}
+        >
+          14-day free trial. No credit card required.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {[
+            {
+              tier: "Manager",
+              price: "$39",
+              unit: "/seat/mo",
+              desc: "For team leads and engineering managers. Full team view, exception alerts, daily synthesis.",
+              cta: false,
+            },
+            {
+              tier: "Executive",
+              price: "$79",
+              unit: "/seat/mo",
+              desc: "For VPs and C-suite. Org-wide visibility, burnout forecasting, retention risk signals.",
+              cta: true,
+            },
+            {
+              tier: "HR / People",
+              price: "$39",
+              unit: "/seat/mo",
+              desc: "For HR and people ops. Workload analysis, onboarding velocity, equity signals.",
+              cta: false,
+            },
+          ].map((t) => (
+            <div
+              key={t.tier}
+              style={{
+                padding: "28px",
+                background: t.cta ? "var(--bg-inverse)" : "var(--bg-elevated)",
+                border: `1px solid ${t.cta ? "transparent" : "var(--border-default)"}`,
+                borderRadius: "var(--radius-xl)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "var(--font-size-sm)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  color: t.cta ? "var(--text-inverse)" : "var(--text-muted)",
+                  margin: "0 0 16px",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--letter-spacing-wide)",
+                }}
+              >
+                {t.tier}
+              </p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "16px" }}>
+                <span
+                  style={{
+                    fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
+                    fontWeight: "var(--font-weight-bold)",
+                    letterSpacing: "var(--letter-spacing-tight)",
+                    color: t.cta ? "var(--text-inverse)" : "var(--text-primary)",
+                  }}
+                >
+                  {t.price}
+                </span>
+                <span
+                  style={{
+                    fontSize: "var(--font-size-sm)",
+                    color: t.cta ? "var(--color-slate-400)" : "var(--text-muted)",
+                  }}
+                >
+                  {t.unit}
+                </span>
+              </div>
+              <p
+                style={{
+                  fontSize: "var(--font-size-sm)",
+                  color: t.cta ? "var(--color-slate-400)" : "var(--text-secondary)",
+                  lineHeight: "var(--line-height-relaxed)",
+                  margin: "0 0 24px",
+                }}
+              >
+                {t.desc}
+              </p>
+              <p
+                style={{
+                  fontSize: "var(--font-size-xs)",
+                  color: t.cta ? "var(--color-slate-500)" : "var(--text-muted)",
+                }}
+              >
+                14-day free trial included
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p
+          style={{
+            marginTop: "24px",
+            fontSize: "var(--font-size-sm)",
+            color: "var(--text-muted)",
+          }}
+        >
+          IC contributors (engineers, designers, PMs) are free — they only submit check-ins.
+          Seats are counted for managers and leaders only.
+        </p>
+      </section>
+
       {/* ── Ghost employee callout ──────────────────────────────────── */}
       <section
         style={{

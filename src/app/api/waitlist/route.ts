@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { sendWaitlistConfirmationEmail } from "@/lib/resend";
 
 const schema = z.object({
   email: z.string().email().max(254),
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
         source: "landing-page",
       },
     });
+
+    // Fire confirmation email — non-blocking, don't fail the request if it errors
+    sendWaitlistConfirmationEmail({ to: email.toLowerCase() }).catch(() => {});
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err: unknown) {

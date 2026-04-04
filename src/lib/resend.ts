@@ -90,6 +90,44 @@ export async function sendInviteEmail(params: {
   });
 }
 
+export async function sendWaitlistConfirmationEmail(params: {
+  to: string;
+}) {
+  await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: params.to,
+    subject: "You're on the Manifest waitlist",
+    html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
+  <div style="margin-bottom: 32px;">
+    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Manifest</span>
+  </div>
+
+  <h1 style="font-size: 22px; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">You're on the list.</h1>
+  <p style="font-size: 15px; color: #555; margin: 0 0 16px; line-height: 1.6;">
+    We'll reach out with early access as soon as a spot opens up.
+  </p>
+  <p style="font-size: 15px; color: #555; margin: 0 0 32px; line-height: 1.6;">
+    Manifest turns daily 60-second async check-ins into AI-synthesized intelligence reports. Managers see only what needs attention — blocked people, burnout signals, stalled projects. Nothing else.
+  </p>
+
+  <div style="background: #f9f9f9; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
+    <p style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #111;">While you wait:</p>
+    <p style="margin: 0 0 8px; font-size: 14px; color: #555;">→ Forward this to a manager friend who hates status meetings.</p>
+    <p style="margin: 0; font-size: 14px; color: #555;">→ Reply to this email — we read everything.</p>
+  </div>
+
+  <p style="margin: 0; font-size: 13px; color: #999; line-height: 1.5;">
+    — The Manifest team
+  </p>
+</body>
+</html>`,
+  });
+}
+
 export async function sendWeeklyReportEmail(params: {
   to: string;
   managerName: string;

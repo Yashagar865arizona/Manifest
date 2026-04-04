@@ -69,15 +69,11 @@ export async function POST(
 
   const { email, leadershipRole = "IC" } = parsed.data;
 
-  // Check seat limit
+  // Block invites if subscription is canceled
   const subscription = await db.subscription.findUnique({ where: { workspaceId: id } });
-  const memberCount = await db.workspaceMember.count({
-    where: { workspaceId: id, status: "ACCEPTED" },
-  });
-
-  if (subscription && memberCount >= subscription.seatLimit) {
+  if (subscription?.status === "CANCELED") {
     return NextResponse.json(
-      { error: "Seat limit reached. Please upgrade your plan." },
+      { error: "Subscription is canceled. Please reactivate billing to invite members." },
       { status: 403 }
     );
   }

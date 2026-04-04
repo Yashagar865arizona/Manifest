@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { stripe, PLANS, PlanKey } from "@/lib/stripe";
+import { stripe, syncSubscriptionSeats, computeSeatCounts, type BillingInterval } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import type Stripe from "stripe";
 
@@ -27,58 +27,66 @@ export async function POST(request: Request) {
 
   try {
     switch (event.type) {
+      // ─── Checkout completed: create/upgrade subscription ───────────────
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const workspaceId = session.metadata?.workspaceId;
-        const plan = session.metadata?.plan as PlanKey;
+        const interval = (session.metadata?.interval ?? "monthly") as BillingInterval;
 
-        if (!workspaceId || !plan) break;
+        if (!workspaceId || !session.subscription) break;
 
-        const planConfig = PLANS[plan];
-        const subscription = session.subscription as string;
+        const stripeSubscription = await stripe().subscriptions.retrieve(
+          session.subscription as string
+        );
 
-        // Retrieve subscription to get period end
-        const stripeSubscription = await stripe().subscriptions.retrieve(subscription);
+        const status =
+          stripeSubscription.status === "trialing" ? "TRIALING" : "ACTIVE";
 
         await db.subscription.upsert({
           where: { workspaceId },
           update: {
             stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: subscription,
-            plan,
-            status: "ACTIVE",
-            seatLimit: planConfig.seatLimit,
+            stripeSubscriptionId: session.subscription as string,
+            plan: interval === "annual" ? "ANNUAL" : "MONTHLY",
+            status,
             currentPeriodEnd: new Date(
               stripeSubscription.items.data[0].current_period_end * 1000
             ),
-            trialEndsAt: null,
+            trialEndsAt:
+              stripeSubscription.trial_end
+                ? new Date(stripeSubscription.trial_end * 1000)
+                : null,
           },
           create: {
             workspaceId,
             stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: subscription,
-            plan,
-            status: "ACTIVE",
-            seatLimit: planConfig.seatLimit,
+            stripeSubscriptionId: session.subscription as string,
+            plan: interval === "annual" ? "ANNUAL" : "MONTHLY",
+            status,
             currentPeriodEnd: new Date(
               stripeSubscription.items.data[0].current_period_end * 1000
             ),
+            trialEndsAt:
+              stripeSubscription.trial_end
+                ? new Date(stripeSubscription.trial_end * 1000)
+                : null,
           },
         });
         break;
       }
 
+      // ─── Subscription updated: sync status + period ────────────────────
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const workspaceId = subscription.metadata?.workspaceId;
+        const sub = event.data.object as Stripe.Subscription;
+        const workspaceId = sub.metadata?.workspaceId;
         if (!workspaceId) break;
 
         const status =
-          subscription.status === "active"
+          sub.status === "active"
             ? "ACTIVE"
-            : subscription.status === "trialing"
+            : sub.status === "trialing"
             ? "TRIALING"
-            : subscription.status === "past_due"
+            : sub.status === "past_due"
             ? "PAST_DUE"
             : "CANCELED";
 
@@ -87,39 +95,66 @@ export async function POST(request: Request) {
           data: {
             status,
             currentPeriodEnd: new Date(
-              subscription.items.data[0].current_period_end * 1000
+              sub.items.data[0].current_period_end * 1000
             ),
           },
         });
         break;
       }
 
+      // ─── Subscription deleted: cancel ─────────────────────────────────
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const workspaceId = subscription.metadata?.workspaceId;
+        const sub = event.data.object as Stripe.Subscription;
+        const workspaceId = sub.metadata?.workspaceId;
         if (!workspaceId) break;
 
         await db.subscription.update({
           where: { workspaceId },
-          data: { status: "CANCELED" },
+          data: { status: "CANCELED", stripeSubscriptionId: null },
         });
         break;
       }
 
+      // ─── Payment failed: mark past_due ────────────────────────────────
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice & { subscription?: string | null };
-        if (invoice.subscription) {
-          const stripeSubscription = await stripe().subscriptions.retrieve(
-            invoice.subscription as string
-          );
-          const workspaceId = stripeSubscription.metadata?.workspaceId;
-          if (workspaceId) {
-            await db.subscription.update({
-              where: { workspaceId },
-              data: { status: "PAST_DUE" },
-            });
-          }
-        }
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string | null;
+        };
+        if (!invoice.subscription) break;
+
+        const stripeSubscription = await stripe().subscriptions.retrieve(
+          invoice.subscription as string
+        );
+        const workspaceId = stripeSubscription.metadata?.workspaceId;
+        if (!workspaceId) break;
+
+        await db.subscription.update({
+          where: { workspaceId },
+          data: { status: "PAST_DUE" },
+        });
+        break;
+      }
+
+      // ─── Trial ending soon: sync seat quantities ───────────────────────
+      // Fires ~3 days before trial_end. Ensures Stripe has accurate seat
+      // counts before the first real charge.
+      case "customer.subscription.trial_will_end": {
+        const sub = event.data.object as Stripe.Subscription;
+        const workspaceId = sub.metadata?.workspaceId;
+        const interval = (sub.metadata?.interval ?? "monthly") as BillingInterval;
+        if (!workspaceId) break;
+
+        const members = await db.workspaceMember.findMany({
+          where: { workspaceId, status: "ACCEPTED" },
+          select: { leadershipRole: true, status: true },
+        });
+        const seatCounts = computeSeatCounts(members);
+
+        await syncSubscriptionSeats({
+          stripeSubscriptionId: sub.id,
+          interval,
+          seatCounts,
+        });
         break;
       }
     }

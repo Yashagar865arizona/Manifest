@@ -37,9 +37,12 @@
 |---|---|---|
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys | Use live key for production |
 | `STRIPE_WEBHOOK_SECRET` | Created in Step 3 below | |
-| `STRIPE_PRICE_STARTER` | Created in Step 2 below | |
-| `STRIPE_PRICE_GROWTH` | Created in Step 2 below | |
-| `STRIPE_PRICE_SCALE` | Created in Step 2 below | |
+| `STRIPE_PRICE_EXEC_MONTHLY` | Run `scripts/stripe-setup.ts` (Step 2) | Executive/CEO monthly seat |
+| `STRIPE_PRICE_EXEC_ANNUAL` | Run `scripts/stripe-setup.ts` (Step 2) | Executive/CEO annual seat |
+| `STRIPE_PRICE_MGR_MONTHLY` | Run `scripts/stripe-setup.ts` (Step 2) | Manager monthly seat |
+| `STRIPE_PRICE_MGR_ANNUAL` | Run `scripts/stripe-setup.ts` (Step 2) | Manager annual seat |
+| `STRIPE_PRICE_HR_MONTHLY` | Run `scripts/stripe-setup.ts` (Step 2) | HR monthly seat |
+| `STRIPE_PRICE_HR_ANNUAL` | Run `scripts/stripe-setup.ts` (Step 2) | HR annual seat |
 
 ### Connector OAuth (Phase 1 — required for Slack/GitHub/Google integrations)
 
@@ -56,24 +59,23 @@
 
 ## 2. Stripe Products Setup
 
-Create three products in the Stripe Dashboard (Products tab):
+Run the one-time setup script to create per-seat products and prices:
 
-### Product 1 — Starter
-- Name: `Manifest Starter`
-- Pricing: **$29/month** recurring, per workspace
-- Copy the Price ID → set as `STRIPE_PRICE_STARTER`
+```bash
+STRIPE_SECRET_KEY=sk_live_... npx tsx scripts/stripe-setup.ts
+```
 
-### Product 2 — Growth
-- Name: `Manifest Growth`
-- Pricing: **$59/month** recurring, per workspace
-- Copy the Price ID → set as `STRIPE_PRICE_GROWTH`
+This creates 6 Stripe prices (Executive, Manager, HR × monthly/annual) and prints all the required env vars. Copy them into Vercel.
 
-### Product 3 — Scale
-- Name: `Manifest Scale`
-- Pricing: **$149/month** recurring, per workspace
-- Copy the Price ID → set as `STRIPE_PRICE_SCALE`
+**Pricing model:**
+| Role | Monthly | Annual (20% off, billed yearly) |
+|------|---------|--------------------------------|
+| Executive / CEO | $79/seat/mo | $756/seat/yr (~$63/mo) |
+| Manager | $39/seat/mo | $372/seat/yr (~$31/mo) |
+| HR | $39/seat/mo | $372/seat/yr (~$31/mo) |
+| IC (Team Member) | Free | Free |
 
-All three products: enable 14-day free trial in the subscription settings.
+Minimum 5 billable leadership seats per workspace. 14-day free trial with no credit card required.
 
 ---
 
@@ -85,6 +87,7 @@ All three products: enable 14-day free trial in the subscription settings.
    - `checkout.session.completed`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
+   - `customer.subscription.trial_will_end`
    - `invoice.payment_failed`
 4. Copy the **Signing secret** → set as `STRIPE_WEBHOOK_SECRET`
 

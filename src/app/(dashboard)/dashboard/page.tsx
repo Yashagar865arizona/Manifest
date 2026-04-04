@@ -47,6 +47,33 @@ export default async function DashboardPage() {
 
   const role = membership.leadershipRole;
   const workspace = membership.workspace;
+
+  // ICs have no access to the leadership analytics dashboard
+  if (role === "IC") {
+    return (
+      <div className="p-6 max-w-lg">
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-900">{workspace.name}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">Team Member · {format(new Date(), "EEEE, MMMM d")}</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 text-2xl">
+            ✅
+          </div>
+          <h2 className="text-base font-semibold text-gray-900 mb-2">You&apos;re all set</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            You&apos;ll receive a daily check-in prompt at{" "}
+            <span className="font-medium">{workspace.checkInTime}</span> ({workspace.timezone}).
+            Your responses feed the team intelligence dashboard your manager sees.
+          </p>
+          <p className="text-xs text-gray-400">
+            Questions? Contact your workspace admin.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const today = format(new Date(), "yyyy-MM-dd");
 
   const allSnapshots = await getWorkspaceSignalSnapshots(workspace.id, today);

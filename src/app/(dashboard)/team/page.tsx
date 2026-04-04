@@ -2,10 +2,27 @@
 
 import { useState, useEffect } from "react";
 
+type LeadershipRole = "CEO" | "MANAGER" | "HR" | "IC";
+
+const LEADERSHIP_ROLE_LABELS: Record<LeadershipRole, string> = {
+  CEO: "CEO",
+  MANAGER: "Manager",
+  HR: "HR",
+  IC: "Team Member",
+};
+
+const ROLE_COLORS: Record<LeadershipRole, string> = {
+  CEO: "bg-purple-50 text-purple-700",
+  MANAGER: "bg-blue-50 text-blue-700",
+  HR: "bg-teal-50 text-teal-700",
+  IC: "bg-gray-100 text-gray-600",
+};
+
 interface Member {
   id: string;
   invitedEmail: string;
   role: "MANAGER" | "MEMBER";
+  leadershipRole: LeadershipRole;
   status: "PENDING" | "ACCEPTED" | "DECLINED";
   joinedAt: string | null;
   user: {
@@ -28,9 +45,11 @@ export default function TeamPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<LeadershipRole>("IC");
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState(false);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/workspaces")
@@ -61,7 +80,7 @@ export default function TeamPage() {
       const res = await fetch(`/api/workspaces/${workspace.id}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: inviteEmail.trim() }),
+        body: JSON.stringify({ email: inviteEmail.trim(), leadershipRole: inviteRole }),
       });
 
       const data = await res.json();
@@ -69,11 +88,38 @@ export default function TeamPage() {
 
       setInviteSuccess(true);
       setInviteEmail("");
+      setInviteRole("IC");
       setMembers((prev) => [...prev, data]);
     } catch (err: unknown) {
       setInviteError(err instanceof Error ? err.message : "Failed to send invite");
     } finally {
       setInviting(false);
+    }
+  }
+
+  async function handleRoleChange(memberId: string, newRole: LeadershipRole) {
+    if (!workspace) return;
+    setUpdatingRole(memberId);
+
+    try {
+      const res = await fetch(`/api/workspaces/${workspace.id}/members/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadershipRole: newRole }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+
+      setMembers((prev) =>
+        prev.map((m) => (m.id === memberId ? { ...m, leadershipRole: newRole } : m))
+      );
+    } catch (err: unknown) {
+      console.error("Role update failed:", err instanceof Error ? err.message : err);
+    } finally {
+      setUpdatingRole(null);
     }
   }
 
@@ -106,6 +152,16 @@ export default function TeamPage() {
             required
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value as LeadershipRole)}
+            className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+          >
+            <option value="CEO">CEO</option>
+            <option value="MANAGER">Manager</option>
+            <option value="HR">HR</option>
+            <option value="IC">Team Member</option>
+          </select>
           <button
             type="submit"
             disabled={inviting}
@@ -129,28 +185,30 @@ export default function TeamPage() {
         </div>
         <div className="divide-y divide-gray-100">
           {members.map((member) => (
-            <div key={member.id} className="px-5 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">
+            <div key={member.id} className="px-5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600 flex-shrink-0">
                   {(member.user?.name ?? member.invitedEmail)[0].toUpperCase()}
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
                     {member.user?.name ?? member.invitedEmail}
                   </p>
-                  <p className="text-xs text-gray-400">{member.user?.email ?? member.invitedEmail}</p>
+                  <p className="text-xs text-gray-400 truncate">{member.user?.email ?? member.invitedEmail}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                    member.role === "MANAGER"
-                      ? "bg-gray-100 text-gray-700"
-                      : "bg-blue-50 text-blue-700"
-                  }`}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Inline role selector */}
+                <select
+                  value={member.leadershipRole}
+                  onChange={(e) => handleRoleChange(member.id, e.target.value as LeadershipRole)}
+                  disabled={updatingRole === member.id}
+                  className={`px-2 py-1 rounded text-xs font-medium border border-transparent focus:outline-none focus:ring-2 focus:ring-gray-900 cursor-pointer ${ROLE_COLORS[member.leadershipRole]} disabled:opacity-50`}
                 >
-                  {member.role === "MANAGER" ? "Manager" : "Member"}
-                </span>
+                  {Object.entries(LEADERSHIP_ROLE_LABELS).map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                     member.status === "ACCEPTED"

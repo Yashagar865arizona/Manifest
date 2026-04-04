@@ -29,6 +29,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     workspaceName: member.workspace.name,
     invitedEmail: member.invitedEmail,
+    leadershipRole: member.leadershipRole,
     token,
   });
 }

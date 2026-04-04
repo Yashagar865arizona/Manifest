@@ -6,6 +6,7 @@ import { sendInviteEmail } from "@/lib/resend";
 
 const inviteSchema = z.object({
   email: z.string().email(),
+  leadershipRole: z.enum(["CEO", "MANAGER", "HR", "IC"]).optional(),
 });
 
 export async function GET(
@@ -66,7 +67,7 @@ export async function POST(
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
 
-  const { email } = parsed.data;
+  const { email, leadershipRole = "IC" } = parsed.data;
 
   // Check seat limit
   const subscription = await db.subscription.findUnique({ where: { workspaceId: id } });
@@ -93,13 +94,14 @@ export async function POST(
   const member = existing
     ? await db.workspaceMember.update({
         where: { id: existing.id },
-        data: { status: "PENDING", inviteToken: undefined }, // reset token
+        data: { status: "PENDING", leadershipRole },
       })
     : await db.workspaceMember.create({
         data: {
           workspaceId: id,
           invitedEmail: email,
           role: "MEMBER",
+          leadershipRole,
           status: "PENDING",
         },
       });

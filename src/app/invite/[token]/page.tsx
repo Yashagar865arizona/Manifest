@@ -4,9 +4,26 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+type LeadershipRole = "CEO" | "MANAGER" | "HR" | "IC";
+
+const ROLE_LABELS: Record<LeadershipRole, string> = {
+  CEO: "CEO",
+  MANAGER: "Manager",
+  HR: "HR",
+  IC: "Team Member",
+};
+
+const ROLE_DESCRIPTIONS: Record<LeadershipRole, string> = {
+  CEO: "Full org-wide visibility — signals, anomalies, and daily brief.",
+  MANAGER: "Team signals and anomaly alerts for your direct reports.",
+  HR: "Org-wide wellness signals and attrition risk indicators.",
+  IC: "Daily check-ins to keep your team informed. Takes 60 seconds.",
+};
+
 interface InviteInfo {
   workspaceName: string;
   invitedEmail: string;
+  leadershipRole: LeadershipRole;
   token: string;
 }
 
@@ -90,6 +107,8 @@ export default function InvitePage() {
 
   if (!inviteInfo) return null;
 
+  const role = inviteInfo.leadershipRole ?? "IC";
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
       <div className="max-w-sm w-full">
@@ -100,11 +119,13 @@ export default function InvitePage() {
           <h1 className="text-lg font-semibold text-gray-900 mb-1">
             You&apos;re invited to join
           </h1>
-          <p className="text-xl font-bold text-gray-900 mb-2">{inviteInfo.workspaceName}</p>
-          <p className="text-sm text-gray-500 mb-6">
-            Daily team check-ins, synthesized into an AI intelligence report for your manager.
-            Takes 60 seconds a day.
-          </p>
+          <p className="text-xl font-bold text-gray-900 mb-3">{inviteInfo.workspaceName}</p>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-md px-4 py-3 mb-5 text-left">
+            <p className="text-xs text-gray-500 mb-1">Your role</p>
+            <p className="text-sm font-semibold text-gray-900">{ROLE_LABELS[role]}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{ROLE_DESCRIPTIONS[role]}</p>
+          </div>
 
           <button
             onClick={handleAccept}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type LeadershipRole = "CEO" | "MANAGER" | "HR" | "IC";
+
 const TIMEZONES = [
   "America/New_York",
   "America/Chicago",
@@ -27,6 +29,18 @@ const CHECKIN_TIMES = [
   "15:00", "16:00", "17:00", "18:00",
 ];
 
+const ROLE_OPTIONS: { value: LeadershipRole; label: string; hint: string }[] = [
+  { value: "CEO", label: "CEO", hint: "Full org visibility" },
+  { value: "MANAGER", label: "Manager", hint: "Team signals + alerts" },
+  { value: "HR", label: "HR", hint: "Wellness + attrition risk" },
+  { value: "IC", label: "Team Member", hint: "Check-ins only" },
+];
+
+interface InviteRow {
+  email: string;
+  role: LeadershipRole;
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -35,7 +49,7 @@ export default function OnboardingPage() {
     Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"
   );
   const [checkInTime, setCheckInTime] = useState("09:00");
-  const [inviteEmails, setInviteEmails] = useState<string[]>([""]);
+  const [invites, setInvites] = useState<InviteRow[]>([{ email: "", role: "IC" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
@@ -67,14 +81,14 @@ export default function OnboardingPage() {
     if (!workspaceId) return;
     setLoading(true);
 
-    const validEmails = inviteEmails.filter((e) => e.trim() && e.includes("@"));
+    const validInvites = invites.filter((i) => i.email.trim() && i.email.includes("@"));
 
-    for (const email of validEmails) {
+    for (const invite of validInvites) {
       try {
         await fetch(`/api/workspaces/${workspaceId}/members`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim() }),
+          body: JSON.stringify({ email: invite.email.trim(), leadershipRole: invite.role }),
         });
       } catch {
         // Continue even if one invite fails
@@ -83,6 +97,16 @@ export default function OnboardingPage() {
 
     setLoading(false);
     router.push(`/dashboard?workspace=${workspaceId}&welcome=1`);
+  }
+
+  function updateInvite(index: number, field: keyof InviteRow, value: string) {
+    const next = [...invites];
+    next[index] = { ...next[index], [field]: value };
+    setInvites(next);
+  }
+
+  function removeInvite(index: number) {
+    setInvites(invites.filter((_, j) => j !== index));
   }
 
   return (
@@ -160,29 +184,34 @@ export default function OnboardingPage() {
 
         {step === 2 && (
           <div className="bg-white border border-gray-200 rounded-lg p-8">
-            <h1 className="text-xl font-semibold text-gray-900 mb-1">Invite your team</h1>
+            <h1 className="text-xl font-semibold text-gray-900 mb-1">Invite your leadership team</h1>
             <p className="text-sm text-gray-500 mb-6">
-              Each person will receive an invitation email and daily check-in prompts.
+              Assign roles so each leader sees the right dashboard. Team members get daily check-in prompts.
             </p>
 
             <div className="space-y-3 mb-6">
-              {inviteEmails.map((email, i) => (
-                <div key={i} className="flex gap-2">
+              {invites.map((invite, i) => (
+                <div key={i} className="flex gap-2 items-center">
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => {
-                      const next = [...inviteEmails];
-                      next[i] = e.target.value;
-                      setInviteEmails(next);
-                    }}
-                    placeholder="teammate@company.com"
+                    value={invite.email}
+                    onChange={(e) => updateInvite(i, "email", e.target.value)}
+                    placeholder="leader@company.com"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                   />
-                  {inviteEmails.length > 1 && (
+                  <select
+                    value={invite.role}
+                    onChange={(e) => updateInvite(i, "role", e.target.value as LeadershipRole)}
+                    className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                  >
+                    {ROLE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  {invites.length > 1 && (
                     <button
-                      onClick={() => setInviteEmails(inviteEmails.filter((_, j) => j !== i))}
-                      className="text-gray-400 hover:text-gray-600 px-2"
+                      onClick={() => removeInvite(i)}
+                      className="text-gray-400 hover:text-gray-600 px-1 text-lg leading-none"
                     >
                       ×
                     </button>
@@ -191,11 +220,23 @@ export default function OnboardingPage() {
               ))}
 
               <button
-                onClick={() => setInviteEmails([...inviteEmails, ""])}
+                onClick={() => setInvites([...invites, { email: "", role: "IC" }])}
                 className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
               >
                 <span>+</span> Add another
               </button>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-5">
+              <p className="text-xs text-gray-500 font-medium mb-1.5">Role access levels</p>
+              <div className="space-y-1">
+                {ROLE_OPTIONS.map((opt) => (
+                  <div key={opt.value} className="flex gap-2 text-xs">
+                    <span className="font-medium text-gray-700 w-24 shrink-0">{opt.label}</span>
+                    <span className="text-gray-500">{opt.hint}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-3">

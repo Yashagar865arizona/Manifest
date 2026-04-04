@@ -9,6 +9,94 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum MemberRole {
+  MANAGER
+  MEMBER
+}
+
+enum LeadershipRole {
+  CEO
+  MANAGER
+  HR
+  IC
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  GROWTH
+  SCALE
+}
+
+enum SubStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum ConnectorType {
+  SLACK
+  GITHUB
+  GOOGLE_CALENDAR
+}
+
+enum ConnectorStatus {
+  ACTIVE
+  DISCONNECTED
+  ERROR
+}
+
+enum SignalType {
+  // Slack
+  MESSAGE_COUNT
+  CHANNEL_ACTIVITY_COUNT
+  DM_SENT_COUNT
+  DM_RESPONSE_LATENCY_MIN
+  REACTION_COUNT
+  // GitHub
+  COMMITS_COUNT
+  PRS_MERGED_COUNT
+  PRS_OPENED_COUNT
+  PR_REVIEW_COUNT
+  ISSUES_CLOSED_COUNT
+  ISSUES_OPENED_COUNT
+  // Google Calendar
+  MEETING_HOURS
+  FOCUS_TIME_HOURS
+  CALENDAR_EVENTS_COUNT
+  ONEONONE_COUNT
+}
+
+enum SignalSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AnomalyType {
+  GHOST_DETECTION
+  OVERLOAD
+  ATTRITION_RISK
+  MEETING_DEBT
+  STALLED_WORK
+}
+
+// ─────────────────────────────────────────────
+// CORE USER + WORKSPACE
+// ─────────────────────────────────────────────
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -20,38 +108,52 @@ model User {
 
   memberships  WorkspaceMember[]
   checkIns     CheckIn[]
+  rawSignals   RawSignal[]
+  baselines    UserBaseline[]
+  anomalies    AnomalyAlert[]
+  dailyBriefs  DailyBrief[]
+  orgNodes     OrgNode[]
 
   @@map("users")
 }
 
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  timezone    String   @default("UTC")
-  checkInTime String   @default("09:00") // HH:MM in workspace timezone
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  slug           String?  @unique
+  timezone       String   @default("UTC")
+  checkInTime    String   @default("09:00")
+  headcountRange String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  members       WorkspaceMember[]
-  checkIns      CheckIn[]
-  synthesisRuns SynthesisReport[]
-  weeklyReports WeeklyReport[]
-  subscription  Subscription?
+  members            WorkspaceMember[]
+  checkIns           CheckIn[]
+  synthesisRuns      SynthesisReport[]
+  weeklyReports      WeeklyReport[]
+  subscription       Subscription?
+  connectors         ConnectorCredential[]
+  rawSignals         RawSignal[]
+  baselines          UserBaseline[]
+  anomalies          AnomalyAlert[]
+  dailyBriefs        DailyBrief[]
+  orgNodes           OrgNode[]
 
   @@map("workspaces")
 }
 
 model WorkspaceMember {
-  id                  String       @id @default(cuid())
+  id                  String         @id @default(cuid())
   workspaceId         String
   userId              String?
   invitedEmail        String
-  inviteToken         String       @unique @default(cuid())
-  role                MemberRole   @default(MEMBER)
-  status              InviteStatus @default(PENDING)
+  inviteToken         String         @unique @default(cuid())
+  role                MemberRole     @default(MEMBER)
+  leadershipRole      LeadershipRole @default(IC)
+  status              InviteStatus   @default(PENDING)
   checkInTimeOverride String?
   joinedAt            DateTime?
-  createdAt           DateTime     @default(now())
+  createdAt           DateTime       @default(now())
 
   workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user       User?     @relation(fields: [userId], references: [id])
@@ -60,6 +162,152 @@ model WorkspaceMember {
   @@map("workspace_members")
 }
 
+// ─────────────────────────────────────────────
+// ORG TREE
+// ─────────────────────────────────────────────
+
+model OrgNode {
+  id             String         @id @default(cuid())
+  workspaceId    String
+  userId         String
+  managerId      String?
+  department     String?
+  title          String?
+  leadershipRole LeadershipRole @default(IC)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+  @@map("org_nodes")
+}
+
+// ─────────────────────────────────────────────
+// CONNECTOR CREDENTIALS (OAuth tokens per workspace)
+// ─────────────────────────────────────────────
+
+model ConnectorCredential {
+  id             String          @id @default(cuid())
+  workspaceId    String
+  connectorType  ConnectorType
+  status         ConnectorStatus @default(ACTIVE)
+  accessToken    String          @db.Text
+  refreshToken   String?         @db.Text
+  tokenExpiresAt DateTime?
+  teamId         String?
+  teamName       String?
+  scopes         String?
+  metadata       Json?
+  lastSyncAt     DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, connectorType])
+  @@map("connector_credentials")
+}
+
+// ─────────────────────────────────────────────
+// RAW SIGNALS (time-series from connectors)
+// ─────────────────────────────────────────────
+
+model RawSignal {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  userId        String
+  connectorType ConnectorType
+  signalType    SignalType
+  value         Float
+  signalDate    String        // YYYY-MM-DD
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId, signalType, signalDate])
+  @@index([workspaceId, signalDate])
+  @@index([workspaceId, userId])
+  @@map("raw_signals")
+}
+
+// ─────────────────────────────────────────────
+// USER BASELINES (rolling 30-day averages)
+// ─────────────────────────────────────────────
+
+model UserBaseline {
+  id            String     @id @default(cuid())
+  workspaceId   String
+  userId        String
+  signalType    SignalType
+  baselineValue Float
+  stdDev        Float      @default(0)
+  sampleCount   Int        @default(0)
+  windowDays    Int        @default(30)
+  computedAt    DateTime   @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId, signalType])
+  @@map("user_baselines")
+}
+
+// ─────────────────────────────────────────────
+// ANOMALY ALERTS
+// ─────────────────────────────────────────────
+
+model AnomalyAlert {
+  id            String         @id @default(cuid())
+  workspaceId   String
+  userId        String
+  anomalyType   AnomalyType
+  severity      SignalSeverity
+  title         String
+  detail        String         @db.Text
+  signalType    SignalType?
+  currentValue  Float?
+  baselineValue Float?
+  detectedAt    DateTime       @default(now())
+  resolvedAt    DateTime?
+  acknowledged  Boolean        @default(false)
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@index([workspaceId, detectedAt])
+  @@index([workspaceId, userId])
+  @@map("anomaly_alerts")
+}
+
+// ─────────────────────────────────────────────
+// DAILY BRIEFS (per-leader per-day)
+// ─────────────────────────────────────────────
+
+model DailyBrief {
+  id          String         @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        LeadershipRole
+  briefDate   String         // YYYY-MM-DD
+  content     Json           // { headline, signals[], narrative, actions[] }
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId, briefDate])
+  @@map("daily_briefs")
+}
+
+// ─────────────────────────────────────────────
+// LEGACY MODELS (preserved)
+// ─────────────────────────────────────────────
+
 model CheckIn {
   id          String   @id @default(cuid())
   workspaceId String
@@ -67,7 +315,7 @@ model CheckIn {
   content     String   @db.Text
   checkInDate String   // YYYY-MM-DD
   submittedAt DateTime @default(now())
-  token       String   @unique @default(cuid()) // one-click check-in link token
+  token       String   @unique @default(cuid())
   tokenUsed   Boolean  @default(false)
 
   workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -81,8 +329,8 @@ model SynthesisReport {
   id             String   @id @default(cuid())
   workspaceId    String
   reportDate     String   // YYYY-MM-DD
-  reportText     String   @db.Text // AI-generated narrative for managers
-  structuredData Json     // parsed flags, anomalies, confidence scores
+  reportText     String   @db.Text
+  structuredData Json
   createdAt      DateTime @default(now())
 
   workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -130,29 +378,4 @@ model WaitlistEntry {
   createdAt DateTime @default(now())
 
   @@map("waitlist_entries")
-}
-
-enum MemberRole {
-  MANAGER
-  MEMBER
-}
-
-enum InviteStatus {
-  PENDING
-  ACCEPTED
-  DECLINED
-}
-
-enum Plan {
-  TRIAL
-  STARTER
-  GROWTH
-  SCALE
-}
-
-enum SubStatus {
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
 }

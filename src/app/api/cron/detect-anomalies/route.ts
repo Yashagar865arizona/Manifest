@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { format } from "date-fns";
 import { detectAnomalies } from "@/lib/signals";
+import { captureError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ export async function GET(request: Request) {
       await detectAnomalies(workspace.id, today);
       results.push({ workspaceId: workspace.id, status: "ok" });
     } catch (err) {
+      captureError("cron/detect-anomalies", err, { workspaceId: workspace.id, date: today });
       results.push({ workspaceId: workspace.id, status: "error", message: String(err) });
     }
   }

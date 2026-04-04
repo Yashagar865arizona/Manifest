@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get("error");
 
   if (error) {
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=google_denied", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=google_denied", process.env.NEXT_PUBLIC_APP_URL!));
   }
   if (!code || !workspaceId) {
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=google_missing_params", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=google_missing_params", process.env.NEXT_PUBLIC_APP_URL!));
   }
 
   try {
@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
 
     backfillGoogleCalendarSignals(workspaceId, 30).catch(console.error);
 
-    return NextResponse.redirect(new URL("/dashboard/connectors?connected=google", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?connected=google", process.env.NEXT_PUBLIC_APP_URL!));
   } catch (err) {
     console.error("Google OAuth callback error:", err);
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=google_exchange_failed", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=google_exchange_failed", process.env.NEXT_PUBLIC_APP_URL!));
   }
 }

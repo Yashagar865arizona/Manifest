@@ -9,10 +9,10 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get("error");
 
   if (error) {
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=github_denied", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=github_denied", process.env.NEXT_PUBLIC_APP_URL!));
   }
   if (!code || !workspaceId) {
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=github_missing_params", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=github_missing_params", process.env.NEXT_PUBLIC_APP_URL!));
   }
 
   try {
@@ -39,9 +39,9 @@ export async function GET(request: NextRequest) {
 
     backfillGitHubSignals(workspaceId, 30).catch(console.error);
 
-    return NextResponse.redirect(new URL("/dashboard/connectors?connected=github", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?connected=github", process.env.NEXT_PUBLIC_APP_URL!));
   } catch (err) {
     console.error("GitHub OAuth callback error:", err);
-    return NextResponse.redirect(new URL("/dashboard/connectors?error=github_exchange_failed", process.env.NEXT_PUBLIC_APP_URL!));
+    return NextResponse.redirect(new URL("/connectors?error=github_exchange_failed", process.env.NEXT_PUBLIC_APP_URL!));
   }
 }

@@ -5,6 +5,7 @@ import { syncSlackSignalsForDate } from "@/lib/connectors/slack";
 import { syncGitHubSignalsForDate } from "@/lib/connectors/github";
 import { syncGoogleCalendarSignalsForDate } from "@/lib/connectors/google";
 import { computeBaselines } from "@/lib/signals";
+import { captureError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
       await computeBaselines(workspace.id);
       results.push({ workspaceId: workspace.id, status: "ok" });
     } catch (err) {
+      captureError("cron/sync-signals", err, { workspaceId: workspace.id, date: today });
       results.push({ workspaceId: workspace.id, status: "error", message: String(err) });
     }
   }

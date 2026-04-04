@@ -116,7 +116,7 @@ export default async function DashboardPage() {
         </div>
         {!hasData && (
           <a
-            href="/dashboard/connectors"
+            href="/connectors"
             className="text-sm bg-gray-900 text-white px-3 py-1.5 rounded-md font-medium hover:bg-gray-800"
           >
             Connect integrations →
@@ -240,17 +240,36 @@ export default async function DashboardPage() {
 
       {/* No data state */}
       {!hasData && (
-        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">No data yet</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Connect Slack, GitHub, or Google Calendar to start seeing team signals.
-          </p>
-          <a
-            href="/dashboard/connectors"
-            className="inline-block bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
-          >
-            Set up connectors →
-          </a>
+        <div className="bg-white border border-gray-200 rounded-lg p-8">
+          <div className="max-w-md mx-auto text-center">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 text-xl">
+              🔌
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-2">Connect your first integration</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Your dashboard is ready — it just needs data. Connect{" "}
+              <span className="font-medium text-gray-900">Slack</span> first for the fastest time-to-value:
+              message patterns and DM activity are the earliest signal of team health changes.
+            </p>
+            <div className="space-y-2 text-left mb-6 max-w-xs mx-auto">
+              {[
+                { icon: "💬", label: "Slack", desc: "Message activity, DM patterns, channel engagement" },
+                { icon: "⚙️", label: "GitHub", desc: "PR velocity, commits, stalled work" },
+                { icon: "📅", label: "Google Calendar", desc: "Meeting load, focus time, 1:1 cadence" },
+              ].map((i) => (
+                <div key={i.label} className="flex items-start gap-3 text-xs text-gray-500">
+                  <span className="mt-0.5">{i.icon}</span>
+                  <span><span className="font-medium text-gray-700">{i.label}</span> — {i.desc}</span>
+                </div>
+              ))}
+            </div>
+            <a
+              href="/connectors"
+              className="inline-block bg-gray-900 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
+            >
+              Set up integrations →
+            </a>
+          </div>
         </div>
       )}
 

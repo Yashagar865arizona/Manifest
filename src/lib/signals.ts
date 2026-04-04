@@ -99,52 +99,71 @@ function severityFromZscore(z: number, direction: "below" | "above"): SignalSeve
 
 /**
  * Detect anomalies for all users in a workspace for a given date.
- * Creates AnomalyAlert records. Resolves previously open alerts if signal normalized.
+ *
+ * The 5 core signals detected:
+ *   1. GHOST_DETECTION  — >2 std dev below 30-day baseline for 5+ consecutive days
+ *   2. OVERLOAD         — 6+ hours of meetings/day for 5+ consecutive days
+ *   3. ATTRITION_RISK   — reduced Slack + reduced GitHub + tenure < 18 months (all three)
+ *   4. MEETING_DEBT     — >40% of working hours (3.2h/day) in meetings over the past week
+ *   5. STALLED_WORK     — 0 commits for 7+ consecutive calendar days (≈ 5 business days)
+ *
+ * Creates AnomalyAlert records. Auto-resolves previously open alerts when signal normalizes.
  */
 export async function detectAnomalies(workspaceId: string, date: string): Promise<void> {
-  const signals = await db.rawSignal.findMany({
+  const todaySignals = await db.rawSignal.findMany({
     where: { workspaceId, signalDate: date },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-    },
+    include: { user: { select: { id: true, name: true, email: true } } },
   });
 
-  if (signals.length === 0) return;
+  if (todaySignals.length === 0) return;
 
-  const baselines = await db.userBaseline.findMany({
-    where: { workspaceId },
-  });
+  const baselines = await db.userBaseline.findMany({ where: { workspaceId } });
   const baselineMap = new Map(
     baselines.map((b) => [`${b.userId}:${b.signalType}`, b])
   );
 
-  // Ghost detection: look for users with 0 messages AND 0 commits for 3+ consecutive days
   const members = await db.workspaceMember.findMany({
     where: { workspaceId, status: "ACCEPTED" },
     include: { user: { select: { id: true, name: true, email: true } } },
   });
 
-  // Check ghost: last 3 days of MESSAGE_COUNT and COMMITS_COUNT all zero or missing
+  // ═══════════════════════════════════════════
+  // Signal 1: Ghost Detection
+  // Rule: user with established activity baseline drops >2 standard deviations below their
+  // rolling 30-day average for MESSAGE_COUNT or COMMITS_COUNT for 5+ consecutive days.
+  // Severity: HIGH — going quiet for a week is a meaningful disengagement signal.
+  // ═══════════════════════════════════════════
   for (const member of members) {
     if (!member.user) continue;
-    const userId = member.user.id;
+    const { id: userId, name, email } = member.user;
 
-    const last3Days = [1, 2, 3].map((i) => format(subDays(new Date(date), i), "yyyy-MM-dd"));
-    const recentActivity = await db.rawSignal.findMany({
-      where: {
-        workspaceId,
-        userId,
-        signalType: { in: ["MESSAGE_COUNT", "COMMITS_COUNT"] },
-        signalDate: { in: last3Days },
-      },
-    });
+    let ghostConfirmed = false;
+    for (const signalType of ["MESSAGE_COUNT", "COMMITS_COUNT"] as const) {
+      const baseline = baselineMap.get(`${userId}:${signalType}`);
+      // Require an established positive baseline with enough samples to trust std dev
+      if (!baseline || baseline.baselineValue <= 0 || baseline.sampleCount < 7) continue;
 
-    const totalActivity = recentActivity.reduce((sum, s) => sum + s.value, 0);
-    const hasBaseline = baselines.some(
-      (b) => b.userId === userId && (b.signalType === "MESSAGE_COUNT" || b.signalType === "COMMITS_COUNT") && b.baselineValue > 0
-    );
+      const last5Days = Array.from({ length: 5 }, (_, i) =>
+        format(subDays(new Date(date), i), "yyyy-MM-dd")
+      );
+      const recentSignals = await db.rawSignal.findMany({
+        where: { workspaceId, userId, signalType, signalDate: { in: last5Days } },
+        select: { value: true },
+      });
+      // All 5 days must be synced — if data is missing we cannot confirm the pattern
+      if (recentSignals.length < 5) continue;
 
-    if (hasBaseline && totalActivity === 0) {
+      // Every day's value must be more than 2 standard deviations below the baseline
+      const allQuiet = recentSignals.every(
+        (s) => zscore(s.value, baseline.baselineValue, baseline.stdDev) < -2
+      );
+      if (allQuiet) {
+        ghostConfirmed = true;
+        break;
+      }
+    }
+
+    if (ghostConfirmed) {
       const existing = await db.anomalyAlert.findFirst({
         where: { workspaceId, userId, anomalyType: "GHOST_DETECTION", resolvedAt: null },
         orderBy: { detectedAt: "desc" },
@@ -156,8 +175,8 @@ export async function detectAnomalies(workspaceId: string, date: string): Promis
             userId,
             anomalyType: "GHOST_DETECTION",
             severity: "HIGH",
-            title: `${member.user.name ?? member.user.email} has gone quiet`,
-            detail: `No messages or commits detected for the last 3 days. Baseline shows regular activity.`,
+            title: `${name ?? email} has gone quiet`,
+            detail: `Activity dropped >2 std deviations below 30-day baseline on Slack/GitHub for 5+ consecutive days.`,
             detectedAt: new Date(date),
           },
         });
@@ -165,88 +184,287 @@ export async function detectAnomalies(workspaceId: string, date: string): Promis
     }
   }
 
-  // Signal-based anomaly detection using z-scores
-  for (const signal of signals) {
-    const key = `${signal.userId}:${signal.signalType}`;
-    const baseline = baselineMap.get(key);
-    if (!baseline || baseline.sampleCount < 5) continue; // not enough data
+  // ═══════════════════════════════════════════
+  // Signal 2: Overload
+  // Rule: 6+ hours of calendar meetings per day for 5+ consecutive days.
+  // Severity: MEDIUM — calendar overload is urgent but not immediately critical.
+  // ═══════════════════════════════════════════
+  const OVERLOAD_HOURS_THRESHOLD = 6;
+  const OVERLOAD_CONSECUTIVE_DAYS = 5;
 
-    let anomalyType: AnomalyType | null = null;
-    let direction: "below" | "above" = "below";
-    let detail = "";
+  for (const member of members) {
+    if (!member.user) continue;
+    const { id: userId, name, email } = member.user;
 
-    switch (signal.signalType) {
-      case "MESSAGE_COUNT":
-      case "COMMITS_COUNT":
-        direction = "below";
-        anomalyType = signal.signalType === "MESSAGE_COUNT" ? "GHOST_DETECTION" : "GHOST_DETECTION";
-        detail = `Activity dropped to ${signal.value} (baseline: ${baseline.baselineValue.toFixed(1)})`;
-        break;
-      case "MEETING_HOURS":
-        direction = "above";
-        anomalyType = "OVERLOAD";
-        detail = `${signal.value}h of meetings (baseline: ${baseline.baselineValue.toFixed(1)}h)`;
-        break;
-      case "FOCUS_TIME_HOURS":
-        direction = "below";
-        anomalyType = "OVERLOAD";
-        detail = `Only ${signal.value}h focus time (baseline: ${baseline.baselineValue.toFixed(1)}h)`;
-        break;
-    }
-
-    if (!anomalyType) continue;
-
-    const z = zscore(signal.value, baseline.baselineValue, baseline.stdDev);
-    const severity = severityFromZscore(z, direction);
-    if (!severity) continue;
-
-    // Check for existing open anomaly of same type for this user
-    const existing = await db.anomalyAlert.findFirst({
-      where: { workspaceId, userId: signal.userId, anomalyType, resolvedAt: null },
-      orderBy: { detectedAt: "desc" },
+    const last5Days = Array.from({ length: OVERLOAD_CONSECUTIVE_DAYS }, (_, i) =>
+      format(subDays(new Date(date), i), "yyyy-MM-dd")
+    );
+    const meetingSignals = await db.rawSignal.findMany({
+      where: { workspaceId, userId, signalType: "MEETING_HOURS", signalDate: { in: last5Days } },
+      select: { value: true, signalDate: true },
     });
 
-    if (!existing) {
-      const userName = signal.user.name ?? signal.user.email;
-      await db.anomalyAlert.create({
-        data: {
-          workspaceId,
-          userId: signal.userId,
-          anomalyType,
-          severity,
-          title: getAnomalyTitle(anomalyType, userName),
-          detail,
-          signalType: signal.signalType,
-          currentValue: signal.value,
-          baselineValue: baseline.baselineValue,
-          detectedAt: new Date(date),
-        },
+    // Need all 5 days synced with meeting data, each day at/above the absolute threshold
+    if (
+      meetingSignals.length >= OVERLOAD_CONSECUTIVE_DAYS &&
+      meetingSignals.every((s) => s.value >= OVERLOAD_HOURS_THRESHOLD)
+    ) {
+      const existing = await db.anomalyAlert.findFirst({
+        where: { workspaceId, userId, anomalyType: "OVERLOAD", resolvedAt: null },
+        orderBy: { detectedAt: "desc" },
       });
+      if (!existing) {
+        const avgHours = meetingSignals.reduce((s, r) => s + r.value, 0) / meetingSignals.length;
+        await db.anomalyAlert.create({
+          data: {
+            workspaceId,
+            userId,
+            anomalyType: "OVERLOAD",
+            severity: "MEDIUM",
+            title: `${name ?? email} may be overloaded`,
+            detail: `${avgHours.toFixed(1)}h/day in meetings for ${meetingSignals.length} consecutive days (threshold: ${OVERLOAD_HOURS_THRESHOLD}h/day).`,
+            signalType: "MEETING_HOURS",
+            currentValue: avgHours,
+            detectedAt: new Date(date),
+          },
+        });
+      }
     }
   }
 
-  // Resolve anomalies where signal has normalized
+  // ═══════════════════════════════════════════
+  // Signal 3: Attrition Risk
+  // Rule: Combination of three conditions — ALL must be present:
+  //   (a) Reduced Slack communication: MESSAGE_COUNT z-score < -1 (7-day avg vs baseline)
+  //   (b) Reduced GitHub output: COMMITS_COUNT z-score < -1 (7-day avg vs baseline)
+  //   (c) Member tenure under 18 months (joinedAt)
+  // Severity: CRITICAL — early attrition signal in at-risk window.
+  // ═══════════════════════════════════════════
+  for (const member of members) {
+    if (!member.user) continue;
+    const { id: userId, name, email } = member.user;
+
+    // (c) Tenure gate: joinedAt must exist and be < 18 months ago
+    if (!member.joinedAt) continue;
+    const tenureMonths = Math.floor(
+      (new Date(date).getTime() - member.joinedAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+    );
+    if (tenureMonths >= 18) continue;
+
+    const msgBaseline = baselineMap.get(`${userId}:MESSAGE_COUNT`);
+    const commitsBaseline = baselineMap.get(`${userId}:COMMITS_COUNT`);
+    // Both baselines must be established with sufficient samples
+    if (!msgBaseline || !commitsBaseline) continue;
+    if (msgBaseline.sampleCount < 5 || commitsBaseline.sampleCount < 5) continue;
+
+    // Use 7-day rolling average to avoid single-day noise
+    const last7Days = Array.from({ length: 7 }, (_, i) =>
+      format(subDays(new Date(date), i), "yyyy-MM-dd")
+    );
+    const msgSignals = await db.rawSignal.findMany({
+      where: { workspaceId, userId, signalType: "MESSAGE_COUNT", signalDate: { in: last7Days } },
+      select: { value: true },
+    });
+    const commitSignals = await db.rawSignal.findMany({
+      where: { workspaceId, userId, signalType: "COMMITS_COUNT", signalDate: { in: last7Days } },
+      select: { value: true },
+    });
+    // Need at least 3 data points for each to compute a meaningful average
+    if (msgSignals.length < 3 || commitSignals.length < 3) continue;
+
+    const avgMsg = msgSignals.reduce((s, r) => s + r.value, 0) / msgSignals.length;
+    const avgCommits = commitSignals.reduce((s, r) => s + r.value, 0) / commitSignals.length;
+    const msgZ = zscore(avgMsg, msgBaseline.baselineValue, msgBaseline.stdDev);
+    const commitsZ = zscore(avgCommits, commitsBaseline.baselineValue, commitsBaseline.stdDev);
+
+    // (a) + (b): Both signals must be down — partial reduction is not enough
+    if (msgZ < -1 && commitsZ < -1) {
+      const existing = await db.anomalyAlert.findFirst({
+        where: { workspaceId, userId, anomalyType: "ATTRITION_RISK", resolvedAt: null },
+        orderBy: { detectedAt: "desc" },
+      });
+      if (!existing) {
+        await db.anomalyAlert.create({
+          data: {
+            workspaceId,
+            userId,
+            anomalyType: "ATTRITION_RISK",
+            severity: "CRITICAL",
+            title: `Attrition risk signal for ${name ?? email}`,
+            detail: `Slack: ${avgMsg.toFixed(1)} msg/day (baseline: ${msgBaseline.baselineValue.toFixed(1)}), commits: ${avgCommits.toFixed(1)}/day (baseline: ${commitsBaseline.baselineValue.toFixed(1)}). Tenure: ${tenureMonths} months.`,
+            detectedAt: new Date(date),
+          },
+        });
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  // Signal 4: Meeting Debt
+  // Rule: Average MEETING_HOURS > 40% of an 8-hour workday (3.2h/day) over the past 7 days.
+  // Severity: MEDIUM — unsustainable meeting load that erodes focus time.
+  // ═══════════════════════════════════════════
+  const WORKDAY_HOURS = 8;
+  const MEETING_DEBT_THRESHOLD = WORKDAY_HOURS * 0.4; // 3.2 hours
+
+  for (const member of members) {
+    if (!member.user) continue;
+    const { id: userId, name, email } = member.user;
+
+    const last7Days = Array.from({ length: 7 }, (_, i) =>
+      format(subDays(new Date(date), i), "yyyy-MM-dd")
+    );
+    const meetingSignals = await db.rawSignal.findMany({
+      where: { workspaceId, userId, signalType: "MEETING_HOURS", signalDate: { in: last7Days } },
+      select: { value: true },
+    });
+    // Require at least 3 days to avoid false positives from a single heavy day
+    if (meetingSignals.length < 3) continue;
+
+    const avgHours = meetingSignals.reduce((s, r) => s + r.value, 0) / meetingSignals.length;
+
+    if (avgHours > MEETING_DEBT_THRESHOLD) {
+      const existing = await db.anomalyAlert.findFirst({
+        where: { workspaceId, userId, anomalyType: "MEETING_DEBT", resolvedAt: null },
+        orderBy: { detectedAt: "desc" },
+      });
+      if (!existing) {
+        const pct = Math.round((avgHours / WORKDAY_HOURS) * 100);
+        await db.anomalyAlert.create({
+          data: {
+            workspaceId,
+            userId,
+            anomalyType: "MEETING_DEBT",
+            severity: "MEDIUM",
+            title: `${name ?? email} has excessive meeting load`,
+            detail: `${avgHours.toFixed(1)}h/day in meetings over the past 7 days (${pct}% of ${WORKDAY_HOURS}hr workday). Threshold: 40%.`,
+            signalType: "MEETING_HOURS",
+            currentValue: avgHours,
+            detectedAt: new Date(date),
+          },
+        });
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  // Signal 5: Stalled Work
+  // Rule: User with an established commit baseline has 0 commits for 7+ consecutive calendar
+  // days (approximately 5 business days, accounting for weekends in the raw signal stream).
+  // Severity: LOW — work slowdown is an awareness signal; manager should investigate.
+  // ═══════════════════════════════════════════
+  for (const member of members) {
+    if (!member.user) continue;
+    const { id: userId, name, email } = member.user;
+
+    const commitsBaseline = baselineMap.get(`${userId}:COMMITS_COUNT`);
+    // Only flag users who normally commit — no baseline means this is expected
+    if (!commitsBaseline || commitsBaseline.baselineValue <= 0 || commitsBaseline.sampleCount < 5) continue;
+
+    const last7Days = Array.from({ length: 7 }, (_, i) =>
+      format(subDays(new Date(date), i), "yyyy-MM-dd")
+    );
+    const commitSignals = await db.rawSignal.findMany({
+      where: { workspaceId, userId, signalType: "COMMITS_COUNT", signalDate: { in: last7Days } },
+      select: { value: true },
+    });
+    // Require at least 5 synced days to confirm the pattern (handles weekends)
+    if (commitSignals.length < 5) continue;
+
+    const allZero = commitSignals.every((s) => s.value === 0);
+    if (allZero) {
+      const existing = await db.anomalyAlert.findFirst({
+        where: { workspaceId, userId, anomalyType: "STALLED_WORK", resolvedAt: null },
+        orderBy: { detectedAt: "desc" },
+      });
+      if (!existing) {
+        await db.anomalyAlert.create({
+          data: {
+            workspaceId,
+            userId,
+            anomalyType: "STALLED_WORK",
+            severity: "LOW",
+            title: `Work stalled for ${name ?? email}`,
+            detail: `No commits for ${commitSignals.length} consecutive days. Expected baseline: ${commitsBaseline.baselineValue.toFixed(1)} commits/day.`,
+            signalType: "COMMITS_COUNT",
+            currentValue: 0,
+            baselineValue: commitsBaseline.baselineValue,
+            detectedAt: new Date(date),
+          },
+        });
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════
+  // Auto-resolve: close open alerts whose signal has normalized
+  // ═══════════════════════════════════════════
   const openAlerts = await db.anomalyAlert.findMany({
     where: { workspaceId, resolvedAt: null },
   });
 
   for (const alert of openAlerts) {
-    if (alert.signalType) {
-      const todaySignal = signals.find(
-        (s) => s.userId === alert.userId && s.signalType === alert.signalType
-      );
-      if (!todaySignal) continue;
-      const baseline = baselineMap.get(`${alert.userId}:${alert.signalType}`);
-      if (!baseline) continue;
-      const z = zscore(todaySignal.value, baseline.baselineValue, baseline.stdDev);
-      const direction: "below" | "above" = alert.anomalyType === "OVERLOAD" ? "above" : "below";
-      const severity = severityFromZscore(z, direction);
-      if (!severity) {
-        await db.anomalyAlert.update({
-          where: { id: alert.id },
-          data: { resolvedAt: new Date() },
-        });
+    let shouldResolve = false;
+
+    switch (alert.anomalyType) {
+      case "GHOST_DETECTION": {
+        // Resolve when user shows any activity today on Slack or GitHub
+        const activityToday = todaySignals.find(
+          (s) =>
+            s.userId === alert.userId &&
+            (s.signalType === "MESSAGE_COUNT" || s.signalType === "COMMITS_COUNT") &&
+            s.value > 0
+        );
+        shouldResolve = !!activityToday;
+        break;
       }
+      case "OVERLOAD": {
+        // Resolve when today's meetings drop below the 6h threshold
+        const todayMeetings = todaySignals.find(
+          (s) => s.userId === alert.userId && s.signalType === "MEETING_HOURS"
+        );
+        shouldResolve = !!todayMeetings && todayMeetings.value < OVERLOAD_HOURS_THRESHOLD;
+        break;
+      }
+      case "ATTRITION_RISK": {
+        // Resolve when either Slack OR GitHub activity recovers above -1 z-score
+        const msgSig = todaySignals.find(
+          (s) => s.userId === alert.userId && s.signalType === "MESSAGE_COUNT"
+        );
+        const commitSig = todaySignals.find(
+          (s) => s.userId === alert.userId && s.signalType === "COMMITS_COUNT"
+        );
+        const msgB = baselineMap.get(`${alert.userId}:MESSAGE_COUNT`);
+        const commitB = baselineMap.get(`${alert.userId}:COMMITS_COUNT`);
+        if (msgSig && msgB && zscore(msgSig.value, msgB.baselineValue, msgB.stdDev) > -1)
+          shouldResolve = true;
+        if (commitSig && commitB && zscore(commitSig.value, commitB.baselineValue, commitB.stdDev) > -1)
+          shouldResolve = true;
+        break;
+      }
+      case "MEETING_DEBT": {
+        // Resolve when today's meeting hours fall below the debt threshold
+        const todayMeetings = todaySignals.find(
+          (s) => s.userId === alert.userId && s.signalType === "MEETING_HOURS"
+        );
+        shouldResolve = !!todayMeetings && todayMeetings.value < MEETING_DEBT_THRESHOLD;
+        break;
+      }
+      case "STALLED_WORK": {
+        // Resolve when any commits appear today
+        const commitToday = todaySignals.find(
+          (s) => s.userId === alert.userId && s.signalType === "COMMITS_COUNT" && s.value > 0
+        );
+        shouldResolve = !!commitToday;
+        break;
+      }
+    }
+
+    if (shouldResolve) {
+      await db.anomalyAlert.update({
+        where: { id: alert.id },
+        data: { resolvedAt: new Date() },
+      });
     }
   }
 }
@@ -369,3 +587,6 @@ export function computePulseScore(snapshot: UserSignalSnapshot): number {
   const criticalAlerts = snapshot.openAlerts.filter((a) => a.severity === "CRITICAL" || a.severity === "HIGH").length;
   return Math.max(0, Math.min(100, Math.round(raw - criticalAlerts * 15)));
 }
+
+// Keep getAnomalyTitle exported for callers that generate titles outside detectAnomalies
+export { getAnomalyTitle };

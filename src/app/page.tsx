@@ -64,21 +64,37 @@ export default async function LandingPage() {
           >
             Manifest
           </span>
-          <a
-            href="/signup"
-            style={{
-              fontSize: "var(--font-size-sm)",
-              fontWeight: "var(--font-weight-medium)",
-              color: "var(--text-accent)",
-              textDecoration: "none",
-              padding: "7px 16px",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              transition: "background var(--transition-base)",
-            }}
-          >
-            Sign in →
-          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <a
+              href="/demo"
+              style={{
+                fontSize: "var(--font-size-sm)",
+                fontWeight: "var(--font-weight-medium)",
+                color: "var(--text-secondary)",
+                textDecoration: "none",
+                padding: "7px 16px",
+                borderRadius: "var(--radius-md)",
+                transition: "color var(--transition-base)",
+              }}
+            >
+              Live demo
+            </a>
+            <a
+              href="/signup"
+              style={{
+                fontSize: "var(--font-size-sm)",
+                fontWeight: "var(--font-weight-medium)",
+                color: "var(--text-accent)",
+                textDecoration: "none",
+                padding: "7px 16px",
+                border: "1px solid var(--border-default)",
+                borderRadius: "var(--radius-md)",
+                transition: "background var(--transition-base)",
+              }}
+            >
+              Sign in →
+            </a>
+          </div>
         </div>
       </nav>
 

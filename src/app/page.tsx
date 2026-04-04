@@ -2,6 +2,8 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import WaitlistForm from "./_components/WaitlistForm";
 
+export const dynamic = "force-dynamic";
+
 async function getWaitlistCount(): Promise<number> {
   try {
     const { db } = await import("@/lib/db");

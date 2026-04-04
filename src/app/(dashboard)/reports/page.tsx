@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { format } from "date-fns";

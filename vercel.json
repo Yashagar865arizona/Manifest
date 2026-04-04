@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/daily-checkin-emails",
-      "schedule": "0 * * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/daily-synthesis",
-      "schedule": "0 * * * *"
+      "schedule": "0 14 * * *"
     },
     {
       "path": "/api/cron/weekly-report",

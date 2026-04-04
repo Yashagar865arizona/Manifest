@@ -7,21 +7,50 @@
 
 ## 1. Credentials Needed (fill before deploy)
 
+### Core (required for app to boot)
+
 | Variable | Where to get it | Notes |
 |---|---|---|
 | `DATABASE_URL` | Supabase → Settings → Database → Connection string | Use "Transaction" pooler URL (port 6543), not direct |
+| `NEXTAUTH_URL` | `https://workmanifest.com` | Already set ✓ |
+| `NEXT_PUBLIC_APP_URL` | `https://workmanifest.com` | Used for OAuth redirect URIs — must match exactly |
+| `AUTH_SECRET` | Already set ✓ | |
+| `CRON_SECRET` | Already set ✓ | |
+
+### AI Engine
+
+| Variable | Where to get it | Notes |
+|---|---|---|
 | `OPENAI_API_KEY` | platform.openai.com → API keys | Primary synthesis engine (gpt-4.1 / gpt-4.1-mini) |
-| `ANTHROPIC_API_KEY` | console.anthropic.com → API keys | **Optional** — fallback if OpenAI is down (claude-haiku-4-5) |
+| `ANTHROPIC_API_KEY` | console.anthropic.com → API keys | Daily brief engine (claude-haiku-4-5); required for Phase 1 briefs |
+
+### Email (Resend)
+
+| Variable | Where to get it | Notes |
+|---|---|---|
 | `RESEND_API_KEY` | resend.com → API Keys | |
 | `RESEND_FROM_EMAIL` | `Manifest <hello@workmanifest.com>` | Domain must be verified in Resend first |
+
+### Payments (Stripe)
+
+| Variable | Where to get it | Notes |
+|---|---|---|
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys | Use live key for production |
 | `STRIPE_WEBHOOK_SECRET` | Created in Step 3 below | |
 | `STRIPE_PRICE_STARTER` | Created in Step 2 below | |
 | `STRIPE_PRICE_GROWTH` | Created in Step 2 below | |
 | `STRIPE_PRICE_SCALE` | Created in Step 2 below | |
-| `AUTH_SECRET` | Already set ✓ | |
-| `CRON_SECRET` | Already set ✓ | |
-| `NEXTAUTH_URL` | `https://workmanifest.com` | Already set ✓ |
+
+### Connector OAuth (Phase 1 — required for Slack/GitHub/Google integrations)
+
+| Variable | Where to get it | Notes |
+|---|---|---|
+| `SLACK_CLIENT_ID` | api.slack.com → Your Apps → OAuth & Permissions | Redirect URI: `https://workmanifest.com/api/connectors/slack/callback` |
+| `SLACK_CLIENT_SECRET` | Same app settings | |
+| `GITHUB_CLIENT_ID` | GitHub → Settings → Developer settings → OAuth Apps | Redirect URI: `https://workmanifest.com/api/connectors/github/callback` |
+| `GITHUB_CLIENT_SECRET` | Same app settings | |
+| `GOOGLE_CLIENT_ID` | console.cloud.google.com → APIs & Services → Credentials | Redirect URI: `https://workmanifest.com/api/connectors/google/callback` |
+| `GOOGLE_CLIENT_SECRET` | Same credentials page | Scopes needed: `calendar.readonly` |
 
 ---
 
@@ -77,11 +106,16 @@ All three products: enable 14-day free trial in the subscription settings.
    - Format: `postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`
 3. Set `DATABASE_URL` in Vercel env vars
 
-**Run migrations after first deploy:**
+**Run migrations after setting DATABASE_URL:**
 ```bash
-# From local machine with DATABASE_URL set
+# From local machine with DATABASE_URL set in .env.local
 npx prisma migrate deploy
 ```
+
+This runs 3 migrations in order:
+1. `20260403_initial_schema` — creates core tables (users, workspaces, check_ins, etc.)
+2. `20260404_add_waitlist_entries` — adds waitlist table
+3. `20260405_phase1_leadership_os` — adds connector credentials, raw signals, baselines, anomaly alerts, daily briefs, org nodes, and leadershipRole columns
 
 ---
 

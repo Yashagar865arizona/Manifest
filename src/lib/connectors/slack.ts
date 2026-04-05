@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { format, subDays } from "date-fns";
+import { signOAuthState } from "@/lib/oauth-state";
+import { decryptToken } from "@/lib/token-crypto";
 
 const SLACK_API = "https://slack.com/api";
 
@@ -8,7 +10,7 @@ export function getSlackOAuthUrl(workspaceId: string): string {
     client_id: process.env.SLACK_CLIENT_ID!,
     scope: "channels:read,channels:history,users:read,users:read.email,im:history,reactions:read",
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/connectors/slack/callback`,
-    state: workspaceId,
+    state: signOAuthState(workspaceId),
   });
   return `https://slack.com/oauth/v2/authorize?${params}`;
 }
@@ -106,13 +108,15 @@ export async function syncSlackSignalsForDate(workspaceId: string, date: string)
   });
   if (!credential || credential.status !== "ACTIVE") return;
 
+  const accessToken = decryptToken(credential.accessToken);
+
   const dateObj = new Date(date + "T00:00:00Z");
   const oldest = dateObj.getTime() / 1000;
   const latest = oldest + 86400;
 
   const [slackUsers, channels] = await Promise.all([
-    fetchSlackUsers(credential.accessToken),
-    fetchSlackChannels(credential.accessToken),
+    fetchSlackUsers(accessToken),
+    fetchSlackChannels(accessToken),
   ]);
 
   // Build map of slack user id -> workspace user id by email
@@ -142,7 +146,7 @@ export async function syncSlackSignalsForDate(workspaceId: string, date: string)
 
   for (const channel of channels) {
     const messages = await fetchChannelHistory(
-      credential.accessToken,
+      accessToken,
       channel.id,
       oldest,
       latest
@@ -160,12 +164,12 @@ export async function syncSlackSignalsForDate(workspaceId: string, date: string)
   try {
     const imRes = await fetch(
       `${SLACK_API}/conversations.list?types=im&limit=200`,
-      { headers: { Authorization: `Bearer ${credential.accessToken}` } }
+      { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     const imData = await imRes.json();
     if (imData.ok) {
       for (const im of imData.channels ?? []) {
-        const msgs = await fetchChannelHistory(credential.accessToken, im.id, oldest, latest);
+        const msgs = await fetchChannelHistory(accessToken, im.id, oldest, latest);
         for (const msg of msgs) {
           if (!msg.user || !slackIdToUserId.has(msg.user)) continue;
           const uid = slackIdToUserId.get(msg.user)!;

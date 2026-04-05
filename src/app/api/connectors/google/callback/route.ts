@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { exchangeGoogleCode, backfillGoogleCalendarSignals } from "@/lib/connectors/google";
+import { verifyOAuthState } from "@/lib/oauth-state";
+import { encryptToken } from "@/lib/token-crypto";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const workspaceId = searchParams.get("state");
+  const rawState = searchParams.get("state");
   const error = searchParams.get("error");
 
   if (error) {
     return NextResponse.redirect(new URL("/connectors?error=google_denied", process.env.NEXT_PUBLIC_APP_URL!));
   }
-  if (!code || !workspaceId) {
+  if (!code || !rawState) {
     return NextResponse.redirect(new URL("/connectors?error=google_missing_params", process.env.NEXT_PUBLIC_APP_URL!));
+  }
+
+  const workspaceId = verifyOAuthState(rawState);
+  if (!workspaceId) {
+    return NextResponse.redirect(new URL("/connectors?error=google_invalid_state", process.env.NEXT_PUBLIC_APP_URL!));
   }
 
   try {
@@ -25,15 +32,15 @@ export async function GET(request: NextRequest) {
         workspaceId,
         connectorType: "GOOGLE_CALENDAR",
         status: "ACTIVE",
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token ?? null,
+        accessToken: encryptToken(tokenData.access_token),
+        refreshToken: tokenData.refresh_token ? encryptToken(tokenData.refresh_token) : null,
         tokenExpiresAt: expiresAt,
         scopes: tokenData.scope,
       },
       update: {
         status: "ACTIVE",
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token ?? undefined,
+        accessToken: encryptToken(tokenData.access_token),
+        refreshToken: tokenData.refresh_token ? encryptToken(tokenData.refresh_token) : undefined,
         tokenExpiresAt: expiresAt,
         scopes: tokenData.scope,
       },

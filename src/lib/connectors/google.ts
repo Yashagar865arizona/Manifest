@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { format, subDays } from "date-fns";
+import { signOAuthState } from "@/lib/oauth-state";
+import { decryptToken, encryptToken } from "@/lib/token-crypto";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CALENDAR_API = "https://www.googleapis.com/calendar/v3";
@@ -12,7 +14,7 @@ export function getGoogleOAuthUrl(workspaceId: string): string {
     scope: "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/userinfo.email openid",
     access_type: "offline",
     prompt: "consent",
-    state: workspaceId,
+    state: signOAuthState(workspaceId),
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 }
@@ -40,6 +42,13 @@ export async function exchangeGoogleCode(code: string): Promise<{
   return data;
 }
 
+export class GoogleTokenRevokedError extends Error {
+  constructor() {
+    super("Google refresh token has been revoked");
+    this.name = "GoogleTokenRevokedError";
+  }
+}
+
 export async function refreshGoogleToken(refreshToken: string): Promise<{ access_token: string; expires_in: number }> {
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
@@ -52,7 +61,11 @@ export async function refreshGoogleToken(refreshToken: string): Promise<{ access
     }),
   });
   const data = await res.json();
-  if (data.error) throw new Error(`Google token refresh error: ${data.error_description}`);
+  if (data.error) {
+    // invalid_grant means the token was revoked or expired permanently
+    if (data.error === "invalid_grant") throw new GoogleTokenRevokedError();
+    throw new Error(`Google token refresh error: ${data.error_description}`);
+  }
   return data;
 }
 
@@ -71,15 +84,30 @@ async function getValidToken(credential: {
   tokenExpiresAt?: Date | null;
   workspaceId: string;
 }): Promise<string> {
+  const accessToken = decryptToken(credential.accessToken);
   if (credential.tokenExpiresAt && credential.tokenExpiresAt > new Date(Date.now() + 60_000)) {
-    return credential.accessToken;
+    return accessToken;
   }
   if (!credential.refreshToken) throw new Error("Google token expired and no refresh token available");
-  const refreshed = await refreshGoogleToken(credential.refreshToken);
+
+  let refreshed: { access_token: string; expires_in: number };
+  try {
+    refreshed = await refreshGoogleToken(decryptToken(credential.refreshToken));
+  } catch (err) {
+    if (err instanceof GoogleTokenRevokedError) {
+      // Mark connector as ERROR so syncs stop and UI shows reconnect prompt
+      await db.connectorCredential.update({
+        where: { workspaceId_connectorType: { workspaceId: credential.workspaceId, connectorType: "GOOGLE_CALENDAR" } },
+        data: { status: "ERROR" },
+      });
+    }
+    throw err;
+  }
+
   await db.connectorCredential.update({
     where: { workspaceId_connectorType: { workspaceId: credential.workspaceId, connectorType: "GOOGLE_CALENDAR" } },
     data: {
-      accessToken: refreshed.access_token,
+      accessToken: encryptToken(refreshed.access_token),
       tokenExpiresAt: new Date(Date.now() + refreshed.expires_in * 1000),
     },
   });

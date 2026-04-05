@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { format, subDays } from "date-fns";
+import { signOAuthState } from "@/lib/oauth-state";
+import { decryptToken } from "@/lib/token-crypto";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -8,7 +10,7 @@ export function getGitHubOAuthUrl(workspaceId: string): string {
     client_id: process.env.GITHUB_CLIENT_ID!,
     scope: "read:user,read:org,repo",
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/connectors/github/callback`,
-    state: workspaceId,
+    state: signOAuthState(workspaceId),
   });
   return `https://github.com/login/oauth/authorize?${params}`;
 }
@@ -93,7 +95,7 @@ export async function syncGitHubSignalsForDate(workspaceId: string, date: string
   });
   if (!credential || credential.status !== "ACTIVE") return;
 
-  const token = credential.accessToken;
+  const token = decryptToken(credential.accessToken);
   const since = new Date(date + "T00:00:00Z").toISOString();
   const until = new Date(date + "T23:59:59Z").toISOString();
 

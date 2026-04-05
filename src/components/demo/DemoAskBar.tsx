@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@vercel/analytics";
 
 const SUGGESTED_QUESTIONS = [
   "Who is at risk this week?",
@@ -20,6 +21,7 @@ export function DemoAskBar() {
     setQuestion(trimmed);
     setLoading(true);
     setAnswer(null);
+    track("demo_ask_submitted", { question: trimmed.slice(0, 100) });
     try {
       const res = await fetch("/api/demo/ask", {
         method: "POST",

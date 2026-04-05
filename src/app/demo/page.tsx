@@ -1,6 +1,7 @@
 import { getDemoSnapshot, getDemoAlerts, getDemoStats } from "@/lib/demo-data";
 import type { DemoAnomalyType, DemoSeverity } from "@/lib/demo-data";
 import { DemoAskBar } from "@/components/demo/DemoAskBar";
+import { DemoRoleLink } from "@/components/demo/DemoRoleLink";
 
 export const metadata = {
   title: "Manifest — Live Demo: Axiom Labs",
@@ -72,18 +73,10 @@ export default async function DemoPage({
 
           <nav className="flex-1 p-3 space-y-0.5">
             {(["ceo", "manager", "hr"] as DemoRole[]).map((r) => (
-              <a
-                key={r}
-                href={`/demo?role=${r}`}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
-                  role === r
-                    ? "bg-gray-100 text-gray-900 font-medium"
-                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                }`}
-              >
+              <DemoRoleLink key={r} role={r} active={role === r}>
                 <RoleIcon role={r} />
                 {r === "ceo" ? "CEO" : r === "manager" ? "Eng Manager" : "HR"}
-              </a>
+              </DemoRoleLink>
             ))}
 
             <div className="pt-3 border-t border-gray-100 mt-3">

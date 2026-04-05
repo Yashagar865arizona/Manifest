@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@vercel/analytics";
 
 type State = "idle" | "loading" | "success" | "duplicate" | "error";
 
@@ -21,6 +22,7 @@ export default function WaitlistForm() {
       });
 
       if (res.ok) {
+        track("waitlist_signup");
         setState("success");
         setEmail("");
       } else if (res.status === 409) {

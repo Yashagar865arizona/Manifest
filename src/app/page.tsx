@@ -14,9 +14,9 @@ async function getWaitlistCount(): Promise<number> {
 }
 
 export const metadata = {
-  title: "Manifest — Stop guessing. Know exactly what your team shipped.",
+  title: "Radar — Know what is really happening with your team, before it becomes a problem.",
   description:
-    "Daily async check-ins synthesized into AI-powered intelligence reports. No timesheets. No surveillance. Just clarity on what your team actually delivered.",
+    "Radar watches the signals your team already creates and tells managers only what needs attention. No timesheets. No surveillance. Just clarity.",
 };
 
 export default async function LandingPage() {
@@ -62,7 +62,7 @@ export default async function LandingPage() {
               color: "var(--text-primary)",
             }}
           >
-            Manifest
+            Radar
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <a
@@ -160,8 +160,8 @@ export default async function LandingPage() {
               maxWidth: "520px",
             }}
           >
-            Manifest turns daily async check-ins into AI-synthesized intelligence
-            reports for managers. No timesheets. No surveillance. Just clarity.
+            Radar watches the signals your team already creates and surfaces only
+            what needs your attention. No timesheets. No surveillance. Just clarity.
           </p>
 
           <WaitlistForm />
@@ -209,7 +209,7 @@ export default async function LandingPage() {
             marginBottom: "40px",
           }}
         >
-          Why Manifest
+          Why Radar
         </p>
 
         <div
@@ -233,7 +233,7 @@ export default async function LandingPage() {
             {
               icon: "◉",
               title: "Welfare signal built in",
-              body: "Manifest flags burnout patterns and deadline coasting automatically. Catch problems weeks before they become attrition — without invasive monitoring.",
+              body: "Radar flags burnout patterns and deadline coasting automatically. Catch problems weeks before they become attrition — without invasive monitoring.",
             },
           ].map((usp) => (
             <div
@@ -319,7 +319,7 @@ export default async function LandingPage() {
             {
               step: "02",
               title: "Map your org",
-              body: "Import your team structure from a CSV or build it in Manifest. Employees are grouped by team, reporting line, and role.",
+              body: "Import your team structure from a CSV or build it in Radar. Employees are grouped by team, reporting line, and role.",
             },
             {
               step: "03",
@@ -717,7 +717,7 @@ export default async function LandingPage() {
               margin: 0,
             }}
           >
-            Manifest was built to solve this. One lightweight daily check-in per
+            Radar was built to solve this. One lightweight daily check-in per
             employee. One AI-synthesized intelligence briefing per manager. Every
             day.
           </p>
@@ -775,12 +775,10 @@ export default async function LandingPage() {
         }}
       >
         <span style={{ fontWeight: "var(--font-weight-medium)", color: "var(--text-secondary)" }}>
-          Manifest
+          Radar
         </span>
         {" · "}
-        Management intelligence for modern teams
-        {" · "}
-        manifest.work
+        Team intelligence for leadership teams
       </footer>
     </div>
   );

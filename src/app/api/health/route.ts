@@ -54,6 +54,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: "ok",
+    product: "Radar",
     db: { ok: true, latencyMs: dbLatencyMs },
     activeWorkspaces: workspaceCount,
     alertQueueDepth,

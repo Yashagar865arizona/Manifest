@@ -4,9 +4,9 @@ import { DemoAskBar } from "@/components/demo/DemoAskBar";
 import { DemoRoleLink } from "@/components/demo/DemoRoleLink";
 
 export const metadata = {
-  title: "Manifest — Live Demo: Axiom Labs",
+  title: "Radar — Live Demo: Axiom Labs",
   description:
-    "See Manifest in action with a fully-populated demo workspace. No signup required.",
+    "See Radar in action with a fully-populated demo workspace. No signup required.",
 };
 
 type DemoRole = "ceo" | "manager" | "hr";
@@ -67,7 +67,7 @@ export default async function DemoPage({
         <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-100">
             <span className="text-sm font-bold tracking-tight text-gray-900">
-              AI Leadership OS
+              Radar
             </span>
           </div>
 

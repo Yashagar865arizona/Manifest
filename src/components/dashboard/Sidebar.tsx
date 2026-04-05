@@ -74,7 +74,7 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="w-56 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-100">
-        <span className="text-sm font-bold tracking-tight text-gray-900">AI Leadership OS</span>
+        <span className="text-sm font-bold tracking-tight text-gray-900">Radar</span>
       </div>
 
       <nav className="flex-1 p-3 space-y-0.5">

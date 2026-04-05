@@ -4,7 +4,7 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "re_placeholder");
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Manifest <noreply@usemanifest.app>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Radar <noreply@usemanifest.app>";
 const WAITLIST_FROM_EMAIL = process.env.WAITLIST_FROM_EMAIL ?? FROM_EMAIL;
 const APP_URL = process.env.NEXTAUTH_URL ?? "https://usemanifest.app";
 
@@ -27,7 +27,7 @@ export async function sendCheckInEmail(params: {
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
   <div style="margin-bottom: 32px;">
-    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Manifest</span>
+    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Radar</span>
   </div>
 
   <h1 style="font-size: 22px; font-weight: 600; margin: 0 0 8px; line-height: 1.3;">Hi ${params.memberName} — 60-second check-in</h1>
@@ -64,19 +64,19 @@ export async function sendInviteEmail(params: {
   await getResend().emails.send({
     from: FROM_EMAIL,
     to: params.to,
-    subject: `${params.inviterName} invited you to ${params.workspaceName} on Manifest`,
+    subject: `${params.inviterName} invited you to ${params.workspaceName} on Radar`,
     html: `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
   <div style="margin-bottom: 32px;">
-    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Manifest</span>
+    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Radar</span>
   </div>
 
   <h1 style="font-size: 22px; font-weight: 600; margin: 0 0 16px;">You've been invited to join ${params.workspaceName}</h1>
   <p style="font-size: 15px; color: #555; margin: 0 0 32px; line-height: 1.5;">
-    <strong>${params.inviterName}</strong> has invited you to join their team on Manifest — a lightweight daily check-in tool. You'll get a quick daily prompt, and your manager gets an AI-synthesized summary.
+    <strong>${params.inviterName}</strong> has invited you to join their team on Radar — a lightweight daily check-in tool. You'll get a quick daily prompt, and your manager gets an AI-synthesized summary.
   </p>
 
   <a href="${inviteUrl}" style="display: inline-block; background: #111; color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-size: 15px; font-weight: 500;">
@@ -93,7 +93,7 @@ export async function sendInviteEmail(params: {
 
 function unsubscribeFooter(unsubscribeUrl: string): string {
   return `<p style="margin: 40px 0 0; font-size: 12px; color: #bbb; line-height: 1.5;">
-    You're receiving this because you signed up at usemanifest.app.
+    You're receiving this because you signed up for Radar.
     <a href="${unsubscribeUrl}" style="color: #bbb; text-decoration: underline;">Unsubscribe</a>
   </p>`;
 }
@@ -115,7 +115,7 @@ export async function sendWaitlistConfirmationEmail(params: {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
   <p style="font-size: 15px; line-height: 1.7; margin: 0 0 16px;">You're on the list.</p>
   <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 16px;">
-    We're building Manifest — a tool that watches the signals your team already creates (Slack activity, GitHub commits, calendar load) and tells you only what needs your attention. No surveys. No dashboards to check. Just a quiet alert when someone is burning out or a project is stalling.
+    We're building Radar — a tool that watches the signals your team already creates (Slack activity, GitHub commits, calendar load) and tells you only what needs your attention. No surveys. No dashboards to check. Just a quiet alert when someone is burning out or a project is stalling.
   </p>
   <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 24px;">
     We're onboarding design partners soon. If you want early access to shape the product, reply to this email and tell me what you're managing right now.
@@ -170,7 +170,7 @@ export async function sendWaitlistEmail3(params: {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
-  <p style="font-size: 15px; line-height: 1.7; margin: 0 0 16px;">The first question most people ask when I describe Manifest is: "do you make employees fill out forms?"</p>
+  <p style="font-size: 15px; line-height: 1.7; margin: 0 0 16px;">The first question most people ask when I describe Radar is: "do you make employees fill out forms?"</p>
   <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 16px;">No. Your team doesn't do anything differently.</p>
   <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 8px;">Here's how it works:</p>
   <ul style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 16px; padding-left: 20px;">
@@ -203,10 +203,10 @@ export async function sendWaitlistEmail4(params: {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
-  <p style="font-size: 15px; line-height: 1.7; margin: 0 0 16px;">We're looking for 5 companies to use Manifest for free in exchange for a weekly 30-minute call.</p>
+  <p style="font-size: 15px; line-height: 1.7; margin: 0 0 16px;">We're looking for 5 companies to use Radar for free in exchange for a weekly 30-minute call.</p>
   <p style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 8px;"><strong>What you get:</strong></p>
   <ul style="font-size: 15px; line-height: 1.7; color: #333; margin: 0 0 16px; padding-left: 20px;">
-    <li style="margin-bottom: 6px;">Full access to Manifest — connectors, daily briefs, anomaly detection — at no cost</li>
+    <li style="margin-bottom: 6px;">Full access to Radar — connectors, daily briefs, anomaly detection — at no cost</li>
     <li style="margin-bottom: 6px;">Direct line to us. Your feedback shapes the roadmap.</li>
     <li style="margin-bottom: 6px;">We'll reference you as an anonymous case study (only with your approval)</li>
   </ul>
@@ -276,7 +276,7 @@ export async function sendWeeklyReportEmail(params: {
 <head><meta charset="utf-8"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #fff; color: #111;">
   <div style="margin-bottom: 24px;">
-    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Manifest</span>
+    <span style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">Radar</span>
   </div>
 
   <p style="font-size: 13px; color: #999; margin: 0 0 24px; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Report · ${params.workspaceName}</p>

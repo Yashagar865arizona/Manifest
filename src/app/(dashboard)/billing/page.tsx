@@ -165,7 +165,7 @@ export default function BillingPage() {
         >
           {trialDaysLeft > 0
             ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left in your free trial. No credit card required until trial ends.`
-            : "Your free trial has ended. Add a payment method to continue using Manifest."}
+            : "Your free trial has ended. Add a payment method to continue using Radar."}
         </div>
       )}
 

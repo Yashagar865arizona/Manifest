@@ -124,7 +124,7 @@ function renderBriefEmail(
         ${briefContent.actions.map((a) => `<li>${a}</li>`).join("")}
       </ul>` : ""}
     </div>
-    <div class="footer">AI Leadership OS · Unsubscribe · View in browser</div>
+    <div class="footer">Radar · Unsubscribe · View in browser</div>
   </div>
 </body>
 </html>`;

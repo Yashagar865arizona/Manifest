@@ -92,7 +92,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
       <div className="max-w-sm w-full">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Manifest</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Radar</h1>
           <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
         </div>
 

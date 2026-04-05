@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Unsubscribed — Manifest</title>
+  <title>Unsubscribed — Radar</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 80px auto; padding: 0 20px; color: #111; text-align: center;">
   <p style="font-size: 22px; font-weight: 600; margin: 0 0 12px;">You're unsubscribed.</p>

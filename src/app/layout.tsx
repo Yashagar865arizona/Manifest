@@ -9,8 +9,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Manifest — Management Intelligence",
-  description: "Daily team check-ins synthesized into AI-powered intelligence reports for managers.",
+  title: "Radar — Management Intelligence",
+  description: "Know what is really happening with your team, before it becomes a problem.",
 };
 
 export default function RootLayout({

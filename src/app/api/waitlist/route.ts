@@ -18,15 +18,22 @@ export async function POST(request: Request) {
 
     const { email } = parsed.data;
 
-    await db.waitlistEntry.create({
+    const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+    const entry = await db.waitlistEntry.create({
       data: {
         email: email.toLowerCase(),
         source: "landing-page",
+        sequenceStep: 0,
+        nextEmailAt: threeDaysFromNow,
       },
     });
 
     // Fire confirmation email — non-blocking, don't fail the request if it errors
-    sendWaitlistConfirmationEmail({ to: email.toLowerCase() }).catch(() => {});
+    sendWaitlistConfirmationEmail({
+      to: email.toLowerCase(),
+      unsubscribeToken: entry.unsubscribeToken,
+    }).catch(() => {});
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err: unknown) {

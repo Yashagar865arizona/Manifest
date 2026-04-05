@@ -372,10 +372,14 @@ model Subscription {
 }
 
 model WaitlistEntry {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  source    String?
-  createdAt DateTime @default(now())
+  id               String    @id @default(cuid())
+  email            String    @unique
+  source           String?
+  sequenceStep     Int       @default(0)
+  nextEmailAt      DateTime?
+  unsubscribeToken String    @unique @default(cuid())
+  unsubscribedAt   DateTime?
+  createdAt        DateTime  @default(now())
 
   @@map("waitlist_entries")
 }

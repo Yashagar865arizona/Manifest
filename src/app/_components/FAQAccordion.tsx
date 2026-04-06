@@ -9,28 +9,28 @@ interface FAQItem {
 
 const FAQS: FAQItem[] = [
   {
-    q: "How does Radar get signals without being intrusive?",
-    a: "Radar connects to tools your team already uses — GitHub, Slack, Jira, Google Calendar — via OAuth. It reads activity metadata (commit frequency, message cadence, PR review latency, meeting load) without reading message content. Employees don't install anything or change their behavior.",
+    q: "How does [PRODUCT_NAME] get signals without being intrusive?",
+    a: "[PRODUCT_NAME] connects to tools your team already uses — GitHub, Slack, Jira, Google Calendar — via OAuth. It reads activity metadata (commit frequency, message cadence, PR review latency, meeting load) without reading message content. Employees don't install anything or change their behavior.",
   },
   {
     q: "What is the Employee Value Score (EVS)?",
     a: "EVS is an AI-generated score (0–100) that represents the relative value of work completed by an individual over time. It weighs task complexity, delivery speed, collaboration, and output quality. It's designed to replace activity-based proxies like 'lines of code' with something closer to actual impact.",
   },
   {
-    q: "Does Radar read our Slack messages?",
-    a: "No. Radar only reads message metadata — timestamps, channel, thread depth, reaction counts — to infer communication patterns and silence anomalies. It does not read message content, and all signal processing happens server-side with strict data isolation per company.",
+    q: "Does [PRODUCT_NAME] read our Slack messages?",
+    a: "No. Only message metadata — timestamps, channel, thread depth, reaction counts — to infer communication patterns and silence anomalies. Message content is never read, and all signal processing happens server-side with strict data isolation per company.",
   },
   {
     q: "How long does setup take?",
-    a: "Most teams are up and running in under 10 minutes. Connect GitHub in one click, Slack in one click, Jira in one click. Radar starts building baselines immediately and surfaces its first exceptions within 24 hours as it learns your team's normal patterns.",
+    a: "Most teams are up and running in under 10 minutes. Connect GitHub in one click, Slack in one click, Jira in one click. Baselines start building immediately and the first exceptions surface within 24 hours as it learns your team's normal patterns.",
   },
   {
     q: "Can employees see their own scores?",
-    a: "Not in the current version. Radar is built for leadership visibility, not employee reporting. We're exploring opt-in personal dashboards for a future release — but only if it doesn't create gaming behavior.",
+    a: "Not in the current version. [PRODUCT_NAME] is built for leadership visibility, not employee reporting. We're exploring opt-in personal dashboards for a future release — but only if it doesn't create gaming behavior.",
   },
   {
     q: "What makes this different from existing HR analytics tools?",
-    a: "Most HR tools require surveys, manual data entry, or direct employee participation. Radar is fully passive — zero friction for employees. It also correlates signals across multiple tools simultaneously, which gives it context that single-source tools miss entirely.",
+    a: "Most HR tools require surveys, manual data entry, or direct employee participation. [PRODUCT_NAME] is fully passive — zero friction for employees. It also correlates signals across multiple tools simultaneously, which gives it context that single-source tools miss entirely.",
   },
 ];
 
@@ -52,6 +52,8 @@ export default function FAQAccordion() {
         >
           <button
             onClick={() => setOpen(open === i ? null : i)}
+            aria-expanded={open === i}
+            aria-controls={`faq-answer-${i}`}
             style={{
               width: "100%",
               display: "flex",
@@ -96,6 +98,8 @@ export default function FAQAccordion() {
             </span>
           </button>
           <div
+            id={`faq-answer-${i}`}
+            role="region"
             style={{
               maxHeight: open === i ? "320px" : "0",
               overflow: "hidden",

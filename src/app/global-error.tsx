@@ -1,8 +1,5 @@
 "use client";
 
-// Force dynamic to prevent static prerender (Next.js 16 prerender bug workaround)
-export const dynamic = "force-dynamic";
-
 export default function GlobalError({
   error: _error,
   unstable_retry,

@@ -70,6 +70,7 @@ export default function WaitlistForm() {
         <input
           type="email"
           required
+          aria-label="Work email address"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -124,7 +125,7 @@ export default function WaitlistForm() {
                 : "0 0 24px rgba(59,130,246,0.35), 0 0 0 1px rgba(59,130,246,0.3)",
           }}
         >
-          {state === "loading" ? "Joining…" : "Join the waitlist →"}
+          {state === "loading" ? "Requesting access…" : "Get early access →"}
         </button>
       </form>
 

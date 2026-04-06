@@ -17,9 +17,9 @@ async function getWaitlistCount(): Promise<number> {
 }
 
 export const metadata = {
-  title: "Radar — Stop being the last to know.",
+  title: "[PRODUCT_NAME] — Stop being the last to know.",
   description:
-    "Radar reads your team's work signals — GitHub, Slack, Jira — to surface quiet risks before they become surprises. No surveys. No check-ins. No behavior change required.",
+    "[PRODUCT_NAME] reads your team's work signals — GitHub, Slack, Jira — to surface quiet risks before they become surprises. No surveys. No check-ins. No behavior change required.",
 };
 
 // ── SVG Icon primitives ─────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ const FEATURE_CARDS = [
     icon: <IconBolt />,
     title: "Ghost Alerts",
     label: "Silence detection",
-    body: "Radar notices when someone goes quiet before you do — commits stop, DMs dry up, PRs stall. You get a signal, not a surprise.",
+    body: "Detects when someone goes quiet before you do — commits stop, DMs dry up, PRs stall. You get a signal, not a surprise.",
     accent: "#8B5CF6",
     glow: "rgba(139,92,246,0.12)",
   },
@@ -157,9 +157,9 @@ const FEATURE_CARDS = [
   },
   {
     icon: <IconEye />,
-    title: "Focus Radar",
+    title: "Zero Footprint",
     label: "Zero installation",
-    body: "Nothing for employees to install, change, or know about. Radar runs entirely on the tools your team already uses.",
+    body: "Nothing for employees to install, change, or know about. Runs entirely on the tools your team already uses.",
     accent: "#10B981",
     glow: "rgba(16,185,129,0.12)",
   },
@@ -194,7 +194,7 @@ const PRICING_TIERS = [
       "EVS per employee",
       "14-day history",
     ],
-    cta: "Join waitlist",
+    cta: "Get early access",
     popular: false,
     accent: "#3B82F6",
   },
@@ -210,7 +210,7 @@ const PRICING_TIERS = [
       "Wellbeing trend tracking",
       "90-day history",
     ],
-    cta: "Join waitlist",
+    cta: "Get early access",
     popular: false,
     accent: "#8B5CF6",
   },
@@ -227,22 +227,12 @@ const PRICING_TIERS = [
       "Unlimited history",
       "API access",
     ],
-    cta: "Join waitlist",
+    cta: "Get early access",
     popular: true,
     accent: "#06B6D4",
   },
 ];
 
-const TRUST_LOGOS = [
-  "Series A SaaS",
-  "150-person Startup",
-  "Engineering orgs",
-  "Remote-first teams",
-  "Hypergrowth cos",
-  "VC-backed startups",
-  "Product teams",
-  "Series B & C",
-];
 
 // ── Main page ────────────────────────────────────────────────────────────────
 
@@ -257,6 +247,7 @@ export default async function HomePage() {
     <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
       {/* ── NAV ────────────────────────────────────────────────────────── */}
       <nav
+        aria-label="Main navigation"
         style={{
           position: "fixed",
           top: 0,
@@ -310,7 +301,7 @@ export default async function HomePage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Radar
+              [PRODUCT_NAME]
             </span>
           </div>
 
@@ -382,7 +373,7 @@ export default async function HomePage() {
                 transition: "box-shadow 0.2s, transform 0.2s",
               }}
             >
-              Join waitlist
+              Get early access
             </a>
           </div>
         </div>
@@ -503,7 +494,7 @@ export default async function HomePage() {
               animation: "reveal-up 0.65s ease 0.2s both",
             }}
           >
-            Radar watches GitHub, Slack, and Jira to tell you when someone
+            Watches GitHub, Slack, and Jira to tell you when someone
             on your team is struggling, blocked, or burning out —{" "}
             <strong style={{ color: "#CBD5E1", fontWeight: 500 }}>
               before it shows up in a 1:1 or an exit interview.
@@ -546,7 +537,7 @@ export default async function HomePage() {
                   border: "1px solid rgba(255,255,255,0.1)",
                   borderRadius: "8px",
                   background: "rgba(255,255,255,0.03)",
-                  transition: "all 0.2s ease",
+                  transition: "border-color 0.2s ease, background 0.2s ease, color 0.2s ease",
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -648,7 +639,7 @@ export default async function HomePage() {
                   letterSpacing: "0.01em",
                 }}
               >
-                app.radariq.io/overview
+                app.[productname].io/overview
               </div>
             </div>
             {/* Import the DashboardMockup inline here */}
@@ -670,63 +661,14 @@ export default async function HomePage() {
         />
       </section>
 
-      {/* ── SOCIAL PROOF STRIP ─────────────────────────────────────────── */}
+      {/* ── STATS STRIP ────────────────────────────────────────────────── */}
       <section
         style={{
-          padding: "0 0 80px",
+          padding: "80px 0",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           overflow: "hidden",
         }}
       >
-        <ScrollReveal>
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "#475569",
-              marginBottom: "24px",
-            }}
-          >
-            Early access teams
-          </p>
-        </ScrollReveal>
-
-        {/* Ticker */}
-        <div style={{ position: "relative", overflow: "hidden" }}>
-          <div
-            style={{
-              display: "flex",
-              gap: "0",
-              animation: "ticker 24s linear infinite",
-              width: "max-content",
-            }}
-          >
-            {[...TRUST_LOGOS, ...TRUST_LOGOS].map((logo, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "12px 32px",
-                  fontSize: "0.9375rem",
-                  fontWeight: 600,
-                  color: "#334155",
-                  letterSpacing: "-0.01em",
-                  whiteSpace: "nowrap",
-                  borderRight: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
-                {logo}
-              </div>
-            ))}
-          </div>
-
-          {/* Fade edges */}
-          <div style={{ position: "absolute", top: 0, left: 0, width: "120px", height: "100%", background: "linear-gradient(to right, #020817, transparent)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", top: 0, right: 0, width: "120px", height: "100%", background: "linear-gradient(to left, #020817, transparent)", pointerEvents: "none" }} />
-        </div>
-
         {/* Stats row */}
         <div style={{ marginTop: "64px", maxWidth: "var(--content-max-width)", margin: "64px auto 0", padding: "0 24px" }}>
           <div
@@ -829,21 +771,18 @@ export default async function HomePage() {
         >
           {[
             {
-              icon: "🤫",
               title: "The quiet performer",
               before: "Reliable, ships on time, lots of commits.",
               after: "Commits drop 80%. Slack messages stop. You find out during the quarterly review.",
               color: "#EF4444",
             },
             {
-              icon: "🧱",
               title: "The silent blocker",
               before: "Ticket opened. In-progress for 11 days.",
               after: "No comment. No PR. You assume they're working on it. They've been stuck since day 2.",
               color: "#F59E0B",
             },
             {
-              icon: "🔥",
               title: "The exhausted closer",
               before: "Closes 3x more tickets than anyone else.",
               after: "8h meeting load, zero focus time, skipping lunch. Ships everything. Until they don't.",
@@ -871,9 +810,6 @@ export default async function HomePage() {
                     opacity: 0.7,
                   }}
                 />
-                <span style={{ fontSize: "2rem", display: "block", marginBottom: "16px" }}>
-                  {card.icon}
-                </span>
                 <h3
                   style={{
                     fontSize: "1.0625rem",
@@ -958,7 +894,7 @@ export default async function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Connect your tools in minutes. Radar handles everything else.
+              Connect your tools in minutes. Everything else is handled automatically.
             </p>
           </div>
         </ScrollReveal>
@@ -992,7 +928,7 @@ export default async function HomePage() {
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               ),
-              title: "Radar watches silently",
+              title: "Watches in the background",
               desc: "Analyzes 50+ behavioral signals across your connected tools. Builds individual baselines. Identifies deviation patterns in real time.",
               accent: "#8B5CF6",
             },
@@ -1230,7 +1166,7 @@ export default async function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Whether you&apos;re a team lead, VP, or Head of People — Radar surfaces exactly the
+              Whether you&apos;re a team lead, VP, or Head of People — you get exactly the
               context you need to act.
             </p>
           </div>
@@ -1517,7 +1453,7 @@ export default async function HomePage() {
                 paddingTop: "8px",
               }}
             >
-              I built Radar because I watched a 10x engineer silently spiral for three
+              I built [PRODUCT_NAME] because I watched a 10x engineer silently spiral for three
               months — and found out in an exit interview. Every signal was there. No
               one was reading them.
             </p>
@@ -1545,7 +1481,7 @@ export default async function HomePage() {
                   Yash Agarwal
                 </div>
                 <div style={{ fontSize: "0.8125rem", color: "#64748B" }}>
-                  Co-founder &amp; CEO, Radar
+                  Co-founder &amp; CEO, [PRODUCT_NAME]
                 </div>
               </div>
             </div>
@@ -1687,7 +1623,7 @@ export default async function HomePage() {
               </svg>
             </div>
             <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#475569", letterSpacing: "-0.02em" }}>
-              Radar
+              [PRODUCT_NAME]
             </span>
           </div>
 
@@ -1714,7 +1650,7 @@ export default async function HomePage() {
           </div>
 
           <p style={{ fontSize: "0.8125rem", color: "#334155", margin: 0 }}>
-            © {new Date().getFullYear()} Radar. All rights reserved.
+            © {new Date().getFullYear()} [PRODUCT_NAME]. All rights reserved.
           </p>
         </div>
       </footer>

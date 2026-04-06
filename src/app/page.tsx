@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import WaitlistForm from "./_components/WaitlistForm";
 import DashboardMockup from "./_components/DashboardMockup";
 import ScrollReveal from "./_components/ScrollReveal";
-import { Activity, BellRing, GitMerge, Shield, Zap, RefreshCcw, Eye, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Activity, BellRing, GitMerge, Shield, Zap, RefreshCcw, Eye, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +84,7 @@ export default async function HomePage() {
           <ScrollReveal delay={400}>
             <div id="waitlist" className="w-full max-w-md mx-auto relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/0 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
-              <div className="relative relative p-1 rounded-xl bg-black border border-white/10 glass-panel">
+              <div className="relative p-1 rounded-xl bg-black border border-white/10 glass-panel">
                 <WaitlistForm />
               </div>
               <p className="mt-4 text-xs text-white/40 font-mono text-center tracking-wide">JOINED BY {displayCount} ENG LEADERS</p>

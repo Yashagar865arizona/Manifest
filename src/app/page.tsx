@@ -133,43 +133,49 @@ function IconBrain() {
 const FEATURE_CARDS = [
   {
     icon: <IconGraph />,
-    title: "Signal Intelligence",
-    body: "Correlates data across GitHub, Slack, Jira, and Calendar simultaneously. No single-tool blind spots.",
+    title: "Pulse Brief",
+    label: "Daily signal digest",
+    body: "Every morning, a ranked list of who needs your attention and why. Cross-referenced across GitHub, Slack, Jira, and Calendar.",
     accent: "#3B82F6",
     glow: "rgba(59,130,246,0.12)",
   },
   {
     icon: <IconBolt />,
-    title: "Exception-only Alerts",
-    body: "You only see what actually needs your attention. No reports, no dashboards to check, no noise.",
+    title: "Ghost Alerts",
+    label: "Silence detection",
+    body: "Radar notices when someone goes quiet before you do — commits stop, DMs dry up, PRs stall. You get a signal, not a surprise.",
     accent: "#8B5CF6",
     glow: "rgba(139,92,246,0.12)",
   },
   {
     icon: <IconBrain />,
-    title: "Employee Value Score",
-    body: "AI-computed EVS for every task. Complexity-weighted, not activity-based. Measures output, not presence.",
+    title: "Value Score",
+    label: "AI task scoring",
+    body: "Every completed task gets an AI-generated score weighted by complexity, delivery speed, and quality. Output over activity.",
     accent: "#06B6D4",
     glow: "rgba(6,182,212,0.12)",
   },
   {
     icon: <IconEye />,
-    title: "Zero Employee Friction",
-    body: "Nothing for employees to install. No surveys. No behavior change. Works silently in the background.",
+    title: "Focus Radar",
+    label: "Zero installation",
+    body: "Nothing for employees to install, change, or know about. Radar runs entirely on the tools your team already uses.",
     accent: "#10B981",
     glow: "rgba(16,185,129,0.12)",
   },
   {
     icon: <IconShield />,
-    title: "Privacy-first Architecture",
-    body: "Aggregated signals, never surveillance. No message content is read. SOC 2 compliant design.",
+    title: "Signal Vault",
+    label: "Privacy-first design",
+    body: "Activity patterns only — never message content. No keystroke logging, no screen recording. Data stays within your org.",
     accent: "#F59E0B",
     glow: "rgba(245,158,11,0.12)",
   },
   {
     icon: <IconUsers />,
-    title: "Multi-layer Views",
-    body: "CEO sees company risk. Managers see team health. HR sees people signals. One platform, three lenses.",
+    title: "Command Stack",
+    label: "Leadership layers",
+    body: "CEO gets org-wide risk. Managers see team health. HR sees people signals. One platform, calibrated by role.",
     accent: "#EC4899",
     glow: "rgba(236,72,153,0.12)",
   },
@@ -497,10 +503,10 @@ export default async function HomePage() {
               animation: "reveal-up 0.65s ease 0.2s both",
             }}
           >
-            Radar reads your team&apos;s work signals — GitHub, Slack, Jira — to surface quiet
-            risks before they become problems.{" "}
+            Radar watches GitHub, Slack, and Jira to tell you when someone
+            on your team is struggling, blocked, or burning out —{" "}
             <strong style={{ color: "#CBD5E1", fontWeight: 500 }}>
-              No surveys. No check-ins. No behavior change required.
+              before it shows up in a 1:1 or an exit interview.
             </strong>
           </p>
 
@@ -1143,17 +1149,33 @@ export default async function HomePage() {
                 >
                   {card.icon}
                 </div>
-                <h3
-                  style={{
-                    fontSize: "1.0625rem",
-                    fontWeight: 700,
-                    color: "#F1F5F9",
-                    margin: "0 0 10px",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {card.title}
-                </h3>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                  <h3
+                    style={{
+                      fontSize: "1.0625rem",
+                      fontWeight: 700,
+                      color: "#F1F5F9",
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {card.title}
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: "0.6875rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: card.accent,
+                      opacity: 0.8,
+                      whiteSpace: "nowrap",
+                      marginLeft: "8px",
+                    }}
+                  >
+                    {card.label}
+                  </span>
+                </div>
                 <p
                   style={{
                     fontSize: "0.9rem",
@@ -1450,6 +1472,89 @@ export default async function HomePage() {
         </ScrollReveal>
       </section>
 
+      {/* ── HUMAN ELEMENT ─────────────────────────────────────────────── */}
+      <section
+        style={{
+          padding: "80px 24px",
+          maxWidth: "680px",
+          margin: "0 auto",
+          textAlign: "center",
+        }}
+      >
+        <ScrollReveal>
+          <div
+            style={{
+              padding: "40px 36px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: "20px",
+              position: "relative",
+            }}
+          >
+            {/* Quote mark */}
+            <div
+              style={{
+                position: "absolute",
+                top: "20px",
+                left: "28px",
+                fontSize: "3rem",
+                lineHeight: 1,
+                color: "rgba(59,130,246,0.2)",
+                fontFamily: "Georgia, serif",
+                fontWeight: 700,
+              }}
+            >
+              &ldquo;
+            </div>
+
+            <p
+              style={{
+                fontSize: "1.125rem",
+                lineHeight: 1.7,
+                color: "#CBD5E1",
+                margin: "0 0 28px",
+                fontStyle: "italic",
+                paddingTop: "8px",
+              }}
+            >
+              I built Radar because I watched a 10x engineer silently spiral for three
+              months — and found out in an exit interview. Every signal was there. No
+              one was reading them.
+            </p>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  color: "white",
+                  flexShrink: 0,
+                }}
+              >
+                Y
+              </div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#F1F5F9" }}>
+                  Yash Agarwal
+                </div>
+                <div style={{ fontSize: "0.8125rem", color: "#64748B" }}>
+                  Co-founder &amp; CEO, Radar
+                </div>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
+
       {/* ── FINAL CTA ──────────────────────────────────────────────────── */}
       <section style={{ padding: "0 24px 100px" }}>
         <ScrollReveal>
@@ -1536,7 +1641,8 @@ export default async function HomePage() {
                   color: "#475569",
                 }}
               >
-                No credit card. No commitment. Free during beta.
+                No credit card. No commitment. Free during beta.{" "}
+                <a href="/privacy" style={{ color: "#475569", textDecoration: "underline" }}>Privacy policy</a>.
               </p>
             </div>
           </div>

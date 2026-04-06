@@ -43,16 +43,16 @@ export default function WaitlistForm() {
           alignItems: "center",
           gap: "10px",
           padding: "14px 20px",
-          background: "var(--color-green-50)",
-          border: "1px solid var(--color-green-600)",
-          borderRadius: "var(--radius-lg)",
-          color: "var(--color-green-600)",
-          fontSize: "var(--font-size-sm)",
-          fontWeight: "var(--font-weight-medium)",
+          background: "rgba(16,185,129,0.1)",
+          border: "1px solid rgba(16,185,129,0.3)",
+          borderRadius: "10px",
+          color: "#10B981",
+          fontSize: "0.9375rem",
+          fontWeight: 500,
         }}
       >
         <span>✓</span>
-        <span>You&apos;re on the list. We&apos;ll be in touch.</span>
+        <span>You&apos;re on the list. We&apos;ll be in touch soon.</span>
       </div>
     );
   }
@@ -78,67 +78,88 @@ export default function WaitlistForm() {
           placeholder="work@company.com"
           style={{
             flex: "1 1 220px",
-            padding: "12px 16px",
-            fontSize: "var(--font-size-base)",
-            border: `1px solid ${state === "error" || state === "duplicate" ? "var(--border-error)" : "var(--border-default)"}`,
-            borderRadius: "var(--radius-md)",
-            background: "var(--bg-elevated)",
-            color: "var(--text-primary)",
+            padding: "13px 16px",
+            fontSize: "1rem",
+            border: `1px solid ${state === "error" || state === "duplicate" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.12)"}`,
+            borderRadius: "10px",
+            background: "rgba(255,255,255,0.06)",
+            color: "#F1F5F9",
             outline: "none",
-            transition: "border-color var(--transition-base)",
+            transition: "border-color 0.15s, box-shadow 0.15s",
             minWidth: "0",
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = "var(--border-focus)";
-            e.target.style.boxShadow = "var(--shadow-focus)";
+            e.target.style.borderColor = "rgba(59,130,246,0.6)";
+            e.target.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.15)";
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = state === "error" || state === "duplicate" ? "var(--border-error)" : "var(--border-default)";
+            e.target.style.borderColor =
+              state === "error" || state === "duplicate"
+                ? "rgba(239,68,68,0.5)"
+                : "rgba(255,255,255,0.12)";
             e.target.style.boxShadow = "none";
           }}
         />
         <button
           type="submit"
           disabled={state === "loading"}
+          className="btn-shimmer"
           style={{
-            padding: "12px 24px",
-            background: state === "loading" ? "var(--action-primary-hover)" : "var(--action-primary)",
-            color: "var(--action-primary-text)",
+            padding: "13px 24px",
+            background:
+              state === "loading"
+                ? "rgba(59,130,246,0.6)"
+                : "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
+            color: "white",
             border: "none",
-            borderRadius: "var(--radius-md)",
-            fontSize: "var(--font-size-base)",
-            fontWeight: "var(--font-weight-medium)",
+            borderRadius: "10px",
+            fontSize: "0.9375rem",
+            fontWeight: 600,
             cursor: state === "loading" ? "not-allowed" : "pointer",
-            transition: "background var(--transition-base)",
+            transition: "opacity 0.15s, transform 0.15s, box-shadow 0.15s",
             whiteSpace: "nowrap",
-            letterSpacing: "var(--letter-spacing-tight)",
-          }}
-          onMouseEnter={(e) => {
-            if (state !== "loading") {
-              (e.target as HTMLButtonElement).style.background = "var(--action-primary-hover)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (state !== "loading") {
-              (e.target as HTMLButtonElement).style.background = "var(--action-primary)";
-            }
+            boxShadow:
+              state === "loading"
+                ? "none"
+                : "0 0 24px rgba(59,130,246,0.35), 0 0 0 1px rgba(59,130,246,0.3)",
           }}
         >
           {state === "loading" ? "Joining…" : "Join the waitlist →"}
         </button>
       </form>
 
-      {(state === "error" || state === "duplicate") && (
+      {state === "duplicate" && (
         <p
           style={{
-            marginTop: "8px",
-            fontSize: "var(--font-size-sm)",
-            color: "var(--text-error)",
+            marginTop: "10px",
+            fontSize: "0.875rem",
+            color: "#93C5FD",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
           }}
         >
-          {state === "duplicate"
-            ? "That email is already on the list."
-            : "Something went wrong. Please try again."}
+          ✓ That email is already on the list — you&apos;re good.
+        </p>
+      )}
+
+      {state === "error" && (
+        <p
+          style={{
+            marginTop: "10px",
+            fontSize: "0.875rem",
+            color: "#FCA5A5",
+            lineHeight: 1.5,
+          }}
+        >
+          Something went wrong submitting the form.{" "}
+          <a
+            href="mailto:founders@radariq.io?subject=Waitlist signup"
+            style={{ color: "#93C5FD", textDecoration: "underline" }}
+          >
+            Email us directly
+          </a>{" "}
+          and we&apos;ll add you manually.
         </p>
       )}
     </div>

@@ -1,9 +1,9 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import WaitlistForm from "./_components/WaitlistForm";
-import DashboardTabs from "./_components/DashboardTabs";
-import FAQAccordion from "./_components/FAQAccordion";
+import DashboardMockup from "./_components/DashboardMockup";
 import ScrollReveal from "./_components/ScrollReveal";
+import { Activity, BellRing, GitMerge, Shield, Zap, RefreshCcw, Eye, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -17,1767 +17,194 @@ async function getWaitlistCount(): Promise<number> {
 }
 
 export const metadata = {
-  title: "[PRODUCT_NAME] — Stop being the last to know.",
+  title: "Radar — AI Leadership OS",
   description:
-    "[PRODUCT_NAME] reads your team's work signals — GitHub, Slack, Jira — to surface quiet risks before they become surprises. No surveys. No check-ins. No behavior change required.",
+    "Radar reads your team's work signals to surface quiet risks before they become surprises.",
 };
-
-// ── SVG Icon primitives ─────────────────────────────────────────────────────
-
-function IconGitHub() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
-    </svg>
-  );
-}
-
-function IconSlack() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zm2.521-10.123a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zm10.122 2.521a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zm-1.268 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zm-2.523 10.122a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zm0-1.268a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
-    </svg>
-  );
-}
-
-function IconJira() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35H17.9V6.2a4.35 4.35 0 0 0-4.35-4.2zm-1.06 4.38c0 2.4 1.97 4.34 4.35 4.34h2.02a4.35 4.35 0 0 0-4.34-4.34zm-1.06 4.38c0 2.4 1.97 4.35 4.35 4.35h2.02a4.35 4.35 0 0 0-4.34-4.35zm-8.88 9.24a4.35 4.35 0 0 0 4.35-4.35V13.6H2.86a4.35 4.35 0 0 0 0 8.7h1.7V20.24a4.35 4.35 0 0 1-4-4.24zm10.47-4.17H8.94a4.35 4.35 0 0 0 0 8.7h2.02a4.35 4.35 0 0 0-4.35-4.35z" />
-    </svg>
-  );
-}
-
-function IconZoom() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M4.5 4C2.57 4 1 5.57 1 7.5v9C1 18.43 2.57 20 4.5 20h10c1.93 0 3.5-1.57 3.5-3.5v-2.1l4.7 3.52A.5.5 0 0 0 24 17.5V6.5a.5.5 0 0 0-.8-.4L18.5 9.6V7.5C18.5 5.57 16.93 4 15 4z" />
-    </svg>
-  );
-}
-
-function IconBolt() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  );
-}
-
-function IconEye() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconShield() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
-
-function IconUsers() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-function IconGraph() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  );
-}
-
-function IconCheck() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function IconArrow() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function IconBrain() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/>
-      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/>
-    </svg>
-  );
-}
-
-// ── Color helpers for feature card gradients ─────────────────────────────────
-
-const FEATURE_CARDS = [
-  {
-    icon: <IconGraph />,
-    title: "Pulse Brief",
-    label: "Daily signal digest",
-    body: "Every morning, a ranked list of who needs your attention and why. Cross-referenced across GitHub, Slack, Jira, and Calendar.",
-    accent: "#3B82F6",
-    glow: "rgba(59,130,246,0.12)",
-  },
-  {
-    icon: <IconBolt />,
-    title: "Ghost Alerts",
-    label: "Silence detection",
-    body: "Detects when someone goes quiet before you do — commits stop, DMs dry up, PRs stall. You get a signal, not a surprise.",
-    accent: "#8B5CF6",
-    glow: "rgba(139,92,246,0.12)",
-  },
-  {
-    icon: <IconBrain />,
-    title: "Value Score",
-    label: "AI task scoring",
-    body: "Every completed task gets an AI-generated score weighted by complexity, delivery speed, and quality. Output over activity.",
-    accent: "#06B6D4",
-    glow: "rgba(6,182,212,0.12)",
-  },
-  {
-    icon: <IconEye />,
-    title: "Zero Footprint",
-    label: "Zero installation",
-    body: "Nothing for employees to install, change, or know about. Runs entirely on the tools your team already uses.",
-    accent: "#10B981",
-    glow: "rgba(16,185,129,0.12)",
-  },
-  {
-    icon: <IconShield />,
-    title: "Signal Vault",
-    label: "Privacy-first design",
-    body: "Activity patterns only — never message content. No keystroke logging, no screen recording. Data stays within your org.",
-    accent: "#F59E0B",
-    glow: "rgba(245,158,11,0.12)",
-  },
-  {
-    icon: <IconUsers />,
-    title: "Command Stack",
-    label: "Leadership layers",
-    body: "CEO gets org-wide risk. Managers see team health. HR sees people signals. One platform, calibrated by role.",
-    accent: "#EC4899",
-    glow: "rgba(236,72,153,0.12)",
-  },
-];
-
-const PRICING_TIERS = [
-  {
-    name: "Manager",
-    price: "$39",
-    period: "/seat/mo",
-    desc: "For team leads and engineering managers",
-    features: [
-      "Team signal dashboard",
-      "Exception alerts (Slack/email)",
-      "GitHub + Jira integration",
-      "EVS per employee",
-      "14-day history",
-    ],
-    cta: "Get early access",
-    popular: false,
-    accent: "#3B82F6",
-  },
-  {
-    name: "HR",
-    price: "$39",
-    period: "/seat/mo",
-    desc: "For people ops and HR teams",
-    features: [
-      "People signal dashboard",
-      "Burnout & disengagement alerts",
-      "Slack + Calendar integration",
-      "Wellbeing trend tracking",
-      "90-day history",
-    ],
-    cta: "Get early access",
-    popular: false,
-    accent: "#8B5CF6",
-  },
-  {
-    name: "Executive",
-    price: "$79",
-    period: "/seat/mo",
-    desc: "For VPs, Directors, and C-Suite",
-    features: [
-      "Everything in Manager + HR",
-      "Org-wide exception view",
-      "Cross-team correlation",
-      "Benchmarking by team/role",
-      "Unlimited history",
-      "API access",
-    ],
-    cta: "Get early access",
-    popular: true,
-    accent: "#06B6D4",
-  },
-];
-
-
-// ── Main page ────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const session = await getSession();
   if (session) redirect("/check-in");
-
   const count = await getWaitlistCount();
   const displayCount = count > 50 ? `${Math.floor(count / 50) * 50}+` : "500+";
 
   return (
-    <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
-      {/* ── NAV ────────────────────────────────────────────────────────── */}
-      <nav
-        aria-label="Main navigation"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(2,8,23,0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "var(--content-max-width)",
-            margin: "0 auto",
-            padding: "0 24px",
-            height: "60px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div
-              style={{
-                width: "30px",
-                height: "30px",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 0 16px rgba(59,130,246,0.4)",
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="12" r="5" />
-                <circle cx="12" cy="12" r="9" />
-                <line x1="3" y1="12" x2="3.01" y2="12" strokeWidth="3" />
-                <line x1="21" y1="12" x2="21.01" y2="12" strokeWidth="3" />
-              </svg>
+    <div className="relative min-h-screen bg-background overflow-hidden selection:bg-white/20">
+      <div className="noise-bg" />
+
+      {/* NAV */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/50 backdrop-blur-3xl">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-[0_0_24px_rgba(255,255,255,0.2)]">
+              <div className="w-3 h-3 rounded-full bg-black" />
             </div>
-            <span
-              style={{
-                fontSize: "1.0625rem",
-                fontWeight: 700,
-                color: "#F1F5F9",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              [PRODUCT_NAME]
-            </span>
+            <span className="font-display font-bold text-lg tracking-tight">Radar</span>
           </div>
-
-          {/* Center nav links */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            {[
-              { label: "How it works", href: "#how-it-works" },
-              { label: "Features", href: "#features" },
-              { label: "Pricing", href: "#pricing" },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  color: "#64748B",
-                  textDecoration: "none",
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                }}
-              >
-                {label}
-              </a>
-            ))}
-            <a
-              href="/demo"
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                color: "#94A3B8",
-                textDecoration: "none",
-                padding: "6px 12px",
-                borderRadius: "6px",
-              }}
-            >
-              Demo
-            </a>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-white/60">
+            <a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a>
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           </div>
-
-          {/* Right nav */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <a
-              href="/login"
-              className="nav-link"
-              style={{
-                padding: "7px 16px",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                color: "#94A3B8",
-                textDecoration: "none",
-                borderRadius: "8px",
-                transition: "color 0.15s, background 0.15s",
-              }}
-            >
-              Sign in
-            </a>
-            <a
-              href="#waitlist"
-              style={{
-                padding: "7px 16px",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-                boxShadow: "0 0 16px rgba(59,130,246,0.3)",
-                transition: "box-shadow 0.2s, transform 0.2s",
-              }}
-            >
-              Get early access
+          <div className="flex items-center gap-4">
+            <a href="/login" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Sign in</a>
+            <a href="#waitlist" className="text-sm font-bold bg-white text-black px-4 py-2 rounded-lg hover:scale-105 transition-transform">
+              Get Access
             </a>
           </div>
         </div>
       </nav>
 
-      {/* ── HERO ───────────────────────────────────────────────────────── */}
-      <section
-        style={{
-          position: "relative",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "90px 24px 60px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Animated gradient background */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: `
-              radial-gradient(ellipse 80% 50% at 50% -5%, rgba(59,130,246,0.28) 0%, transparent 65%),
-              radial-gradient(ellipse 50% 50% at 80% 30%, rgba(139,92,246,0.18) 0%, transparent 55%),
-              radial-gradient(ellipse 40% 40% at 20% 70%, rgba(59,130,246,0.1) 0%, transparent 50%),
-              #020817
-            `,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Grid pattern */}
-        <div
-          className="grid-pattern"
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.4,
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Glowing orbs */}
-        <div
-          style={{
-            position: "absolute",
-            top: "15%",
-            left: "60%",
-            width: "500px",
-            height: "500px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)",
-            animation: "glow-pulse 6s ease-in-out infinite",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "40%",
-            left: "10%",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)",
-            animation: "glow-pulse 8s ease-in-out infinite reverse",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Hero content */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            maxWidth: "820px",
-            textAlign: "center",
-          }}
-        >
-          {/* Badge */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "28px" }}>
-            <span className="section-label" style={{ animation: "reveal-up 0.6s ease both" }}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <circle cx="5" cy="5" r="4" fill="#3B82F6" />
-                <circle cx="5" cy="5" r="2" fill="#93C5FD" />
-              </svg>
-              Now accepting early access
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1
-            style={{
-              fontSize: "clamp(2.75rem, 7vw, 5rem)",
-              fontWeight: 800,
-              lineHeight: 1.1,
-              letterSpacing: "-0.04em",
-              color: "#F8FAFC",
-              margin: "0 0 24px",
-              animation: "reveal-up 0.65s ease 0.1s both",
-            }}
-          >
-            Stop being the
-            <br />
-            <span className="gradient-text-hero">last to know.</span>
-          </h1>
-
-          {/* Subheadline */}
-          <p
-            style={{
-              fontSize: "clamp(1.0625rem, 2.5vw, 1.25rem)",
-              lineHeight: 1.65,
-              color: "#94A3B8",
-              maxWidth: "580px",
-              margin: "0 auto 40px",
-              animation: "reveal-up 0.65s ease 0.2s both",
-            }}
-          >
-            Watches GitHub, Slack, and Jira to tell you when someone
-            on your team is struggling, blocked, or burning out —{" "}
-            <strong style={{ color: "#CBD5E1", fontWeight: 500 }}>
-              before it shows up in a 1:1 or an exit interview.
-            </strong>
-          </p>
-
-          {/* CTA + social proof */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "20px",
-              animation: "reveal-up 0.65s ease 0.3s both",
-            }}
-          >
-            <div id="waitlist" style={{ width: "100%", maxWidth: "520px" }}>
-              <WaitlistForm />
+      {/* HERO */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-6 z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(255,255,255,0.06)_0%,transparent_100%)] pointer-events-none" />
+        
+        <div className="max-w-5xl text-center flex flex-col items-center relative z-10">
+          <ScrollReveal delay={100}>
+            <div className="section-label mb-8">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Intelligence Layer for Leadership
             </div>
-            <p style={{ fontSize: "0.75rem", color: "#334155", margin: "8px 0 0", textAlign: "center" }}>
-              No spam. We respect your{" "}
-              <a href="/privacy" style={{ color: "#475569", textDecoration: "underline" }}>privacy</a>.
-            </p>
-            <p style={{ fontSize: "0.8125rem", color: "#475569", margin: 0 }}>
-              Joined by{" "}
-              <strong style={{ color: "#64748B" }}>{displayCount} engineering leaders</strong>.
-              {" "}Free during beta.
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center", marginTop: "8px" }}>
-              <a
-                href="/demo"
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#64748B",
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "8px",
-                  background: "rgba(255,255,255,0.03)",
-                  transition: "border-color 0.2s ease, background 0.2s ease, color 0.2s ease",
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-                </svg>
-                See live demo
-              </a>
-            </div>
-          </div>
+          </ScrollReveal>
 
-          {/* Integration logos row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              marginTop: "48px",
-              flexWrap: "wrap",
-              animation: "reveal-up 0.65s ease 0.4s both",
-            }}
-          >
-            <span style={{ fontSize: "0.8125rem", color: "#475569", marginRight: "8px" }}>Connects with</span>
-            {[
-              { label: "GitHub", icon: <IconGitHub /> },
-              { label: "Slack", icon: <IconSlack /> },
-              { label: "Jira", icon: <IconJira /> },
-              { label: "Zoom", icon: <IconZoom /> },
-            ].map(({ label, icon }) => (
-              <div
-                key={label}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "5px 12px",
-                  borderRadius: "9999px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  color: "#64748B",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                }}
-              >
-                {icon}
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Floating dashboard preview */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            width: "100%",
-            maxWidth: "900px",
-            marginTop: "64px",
-            animation: "reveal-up 0.8s ease 0.5s both",
-          }}
-        >
-          <div
-            style={{
-              borderRadius: "16px",
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: `
-                0 0 0 1px rgba(59,130,246,0.15),
-                0 32px 80px rgba(0,0,0,0.6),
-                0 0 60px rgba(59,130,246,0.1)
-              `,
-              animation: "float 6s ease-in-out infinite",
-            }}
-          >
-            {/* Browser chrome */}
-            <div
-              style={{
-                background: "#0F1629",
-                padding: "11px 16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                borderBottom: "1px solid rgba(255,255,255,0.07)",
-              }}
-            >
-              <span style={{ width: "11px", height: "11px", borderRadius: "50%", background: "#EF4444", opacity: 0.65 }} />
-              <span style={{ width: "11px", height: "11px", borderRadius: "50%", background: "#F59E0B", opacity: 0.65 }} />
-              <span style={{ width: "11px", height: "11px", borderRadius: "50%", background: "#10B981", opacity: 0.65 }} />
-              <div
-                style={{
-                  flex: 1,
-                  marginLeft: "10px",
-                  background: "rgba(255,255,255,0.05)",
-                  borderRadius: "7px",
-                  padding: "4px 12px",
-                  fontSize: "11.5px",
-                  color: "#475569",
-                  letterSpacing: "0.01em",
-                }}
-              >
-                app.[productname].io/overview
-              </div>
-            </div>
-            {/* Import the DashboardMockup inline here */}
-            <HeroDashboard />
-          </div>
-        </div>
-
-        {/* Bottom fade gradient */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "200px",
-            background: "linear-gradient(to top, #020817, transparent)",
-            pointerEvents: "none",
-          }}
-        />
-      </section>
-
-      {/* ── STATS STRIP ────────────────────────────────────────────────── */}
-      <section
-        style={{
-          padding: "80px 0",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          overflow: "hidden",
-        }}
-      >
-        {/* Stats row */}
-        <div style={{ marginTop: "64px", maxWidth: "var(--content-max-width)", margin: "64px auto 0", padding: "0 24px" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: "1px",
-              background: "rgba(255,255,255,0.06)",
-              borderRadius: "16px",
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            {[
-              { stat: "< 10 min", label: "setup time", sub: "No eng required" },
-              { stat: "50+", label: "signals tracked", sub: "Per employee" },
-              { stat: "24h", label: "first exceptions", sub: "After connecting" },
-              { stat: "0", label: "employee actions", sub: "Required" },
-            ].map(({ stat, label, sub }, i) => (
-              <ScrollReveal key={i} delay={i * 80}>
-                <div
-                  style={{
-                    padding: "32px 24px",
-                    background: "rgba(255,255,255,0.02)",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "2.25rem",
-                      fontWeight: 800,
-                      letterSpacing: "-0.04em",
-                      background: "linear-gradient(135deg, #F1F5F9 0%, #93C5FD 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      lineHeight: 1,
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {stat}
-                  </div>
-                  <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 500 }}>{label}</div>
-                  <div style={{ fontSize: "0.75rem", color: "#475569", marginTop: "4px" }}>{sub}</div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PROBLEM SECTION ────────────────────────────────────────────── */}
-      <section
-        style={{
-          padding: "100px 24px",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              The problem
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.75rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.15,
-                margin: "16px 0 20px",
-              }}
-            >
-              Your team is sending signals.
+          <ScrollReveal delay={200}>
+            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[-0.04em] leading-[1.05] mb-6 drop-shadow-2xl text-white">
+              Stop being the
               <br />
-              <span className="gradient-text">You&apos;re missing them.</span>
-            </h2>
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                color: "#64748B",
-                maxWidth: "520px",
-                margin: "0 auto",
-                lineHeight: 1.65,
-              }}
-            >
-              Most manager tools require surveys, HR systems, or behavior change.
-              The real signals are already flowing — no one is listening.
+              <span className="gradient-text-hero">last to know.</span>
+            </h1>
+          </ScrollReveal>
+
+          <ScrollReveal delay={300}>
+            <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+              Radar watches GitHub, Slack, and Jira to tell you when someone is struggling, blocked, or burning out — <strong className="text-white font-medium">before the 1:1.</strong>
             </p>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "16px",
-          }}
-        >
-          {[
-            {
-              title: "The quiet performer",
-              before: "Reliable, ships on time, lots of commits.",
-              after: "Commits drop 80%. Slack messages stop. You find out during the quarterly review.",
-              color: "#EF4444",
-            },
-            {
-              title: "The silent blocker",
-              before: "Ticket opened. In-progress for 11 days.",
-              after: "No comment. No PR. You assume they're working on it. They've been stuck since day 2.",
-              color: "#F59E0B",
-            },
-            {
-              title: "The exhausted closer",
-              before: "Closes 3x more tickets than anyone else.",
-              after: "8h meeting load, zero focus time, skipping lunch. Ships everything. Until they don't.",
-              color: "#8B5CF6",
-            },
-          ].map((card, i) => (
-            <ScrollReveal key={i} delay={i * 100}>
-              <div
-                className="glass-card"
-                style={{
-                  padding: "28px",
-                  height: "100%",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: card.color,
-                    opacity: 0.7,
-                  }}
-                />
-                <h3
-                  style={{
-                    fontSize: "1.0625rem",
-                    fontWeight: 700,
-                    color: "#F1F5F9",
-                    margin: "0 0 16px",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {card.title}
-                </h3>
-                <div
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#64748B",
-                    lineHeight: 1.6,
-                    marginBottom: "12px",
-                    padding: "10px 12px",
-                    background: "rgba(255,255,255,0.03)",
-                    borderRadius: "8px",
-                    borderLeft: "2px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <span style={{ fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.08em", color: "#475569", display: "block", marginBottom: "4px", textTransform: "uppercase" }}>What you see</span>
-                  {card.before}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#94A3B8",
-                    lineHeight: 1.6,
-                    padding: "10px 12px",
-                    background: `rgba(${card.color === "#EF4444" ? "239,68,68" : card.color === "#F59E0B" ? "245,158,11" : "139,92,246"},0.06)`,
-                    borderRadius: "8px",
-                    borderLeft: `2px solid ${card.color}`,
-                  }}
-                >
-                  <span style={{ fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.08em", color: card.color, opacity: 0.8, display: "block", marginBottom: "4px", textTransform: "uppercase" }}>What&apos;s actually happening</span>
-                  {card.after}
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── HOW IT WORKS ───────────────────────────────────────────────── */}
-      <section
-        id="how-it-works"
-        style={{
-          padding: "100px 24px",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              How it works
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.75rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.15,
-                margin: "16px 0 20px",
-              }}
-            >
-              Three steps.{" "}
-              <span className="gradient-text">Zero friction.</span>
-            </h2>
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                color: "#64748B",
-                maxWidth: "440px",
-                margin: "0 auto",
-                lineHeight: 1.6,
-              }}
-            >
-              Connect your tools in minutes. Everything else is handled automatically.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "16px",
-            position: "relative",
-          }}
-        >
-          {[
-            {
-              step: "01",
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              ),
-              title: "Connect your tools",
-              desc: "One-click OAuth with GitHub, Slack, Jira, and Google Calendar. No API keys. No scripts. No engineering required.",
-              accent: "#3B82F6",
-            },
-            {
-              step: "02",
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              ),
-              title: "Watches in the background",
-              desc: "Analyzes 50+ behavioral signals across your connected tools. Builds individual baselines. Identifies deviation patterns in real time.",
-              accent: "#8B5CF6",
-            },
-            {
-              step: "03",
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              ),
-              title: "Exceptions surface to you",
-              desc: "Only the signals that need your attention reach your dashboard or inbox. Nothing else. No daily reports to check.",
-              accent: "#06B6D4",
-            },
-          ].map((step, i) => (
-            <ScrollReveal key={i} delay={i * 120}>
-              <div
-                className="glass-card"
-                style={{
-                  padding: "32px 28px",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Step number watermark */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    right: "20px",
-                    fontSize: "4rem",
-                    fontWeight: 900,
-                    color: "rgba(255,255,255,0.04)",
-                    lineHeight: 1,
-                    letterSpacing: "-0.04em",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {step.step}
-                </div>
-
-                {/* Icon */}
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "12px",
-                    background: `rgba(${step.accent === "#3B82F6" ? "59,130,246" : step.accent === "#8B5CF6" ? "139,92,246" : "6,182,212"},0.12)`,
-                    border: `1px solid ${step.accent}30`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: step.accent,
-                    marginBottom: "20px",
-                  }}
-                >
-                  {step.icon}
-                </div>
-
-                <h3
-                  style={{
-                    fontSize: "1.125rem",
-                    fontWeight: 700,
-                    color: "#F1F5F9",
-                    margin: "0 0 12px",
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {step.title}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "0.9375rem",
-                    color: "#64748B",
-                    lineHeight: 1.65,
-                    margin: 0,
-                  }}
-                >
-                  {step.desc}
-                </p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── FEATURES ───────────────────────────────────────────────────── */}
-      <section
-        id="features"
-        style={{
-          padding: "100px 24px",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              Features
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.75rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.15,
-                margin: "16px 0 20px",
-              }}
-            >
-              Built for how
-              <br />
-              <span className="gradient-text">modern teams actually work.</span>
-            </h2>
-          </div>
-        </ScrollReveal>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "16px",
-          }}
-        >
-          {FEATURE_CARDS.map((card, i) => (
-            <ScrollReveal key={i} delay={i * 80}>
-              <div
-                className="feature-card"
-                style={{
-                  padding: "28px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderRadius: "16px",
-                  cursor: "default",
-                  height: "100%",
-                }}
-              >
-                <div
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "11px",
-                    background: card.glow,
-                    border: `1px solid ${card.accent}25`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: card.accent,
-                    marginBottom: "18px",
-                  }}
-                >
-                  {card.icon}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                  <h3
-                    style={{
-                      fontSize: "1.0625rem",
-                      fontWeight: 700,
-                      color: "#F1F5F9",
-                      margin: 0,
-                      letterSpacing: "-0.02em",
-                    }}
-                  >
-                    {card.title}
-                  </h3>
-                  <span
-                    style={{
-                      fontSize: "0.6875rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                      color: card.accent,
-                      opacity: 0.8,
-                      whiteSpace: "nowrap",
-                      marginLeft: "8px",
-                    }}
-                  >
-                    {card.label}
-                  </span>
-                </div>
-                <p
-                  style={{
-                    fontSize: "0.9rem",
-                    color: "#64748B",
-                    lineHeight: 1.65,
-                    margin: 0,
-                  }}
-                >
-                  {card.body}
-                </p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── DASHBOARD PREVIEW ──────────────────────────────────────────── */}
-      <section
-        style={{
-          padding: "100px 24px",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "48px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              Dashboard
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.75rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.15,
-                margin: "16px 0 20px",
-              }}
-            >
-              One view for
-              <br />
-              <span className="gradient-text">every layer of leadership.</span>
-            </h2>
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                color: "#64748B",
-                maxWidth: "480px",
-                margin: "0 auto",
-                lineHeight: 1.6,
-              }}
-            >
-              Whether you&apos;re a team lead, VP, or Head of People — you get exactly the
-              context you need to act.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={100}>
-          <DashboardTabs />
-        </ScrollReveal>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── PRICING ────────────────────────────────────────────────────── */}
-      <section
-        id="pricing"
-        style={{
-          padding: "100px 24px",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              Pricing
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.75rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.15,
-                margin: "16px 0 20px",
-              }}
-            >
-              Simple, transparent pricing.
-              <br />
-              <span className="gradient-text">Free during beta.</span>
-            </h2>
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                color: "#64748B",
-                maxWidth: "400px",
-                margin: "0 auto",
-              }}
-            >
-              Join the waitlist for free access. Pricing kicks in at GA.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "16px",
-            alignItems: "start",
-          }}
-        >
-          {PRICING_TIERS.map((tier, i) => (
-            <ScrollReveal key={i} delay={i * 100}>
-              <div
-                style={{
-                  padding: "32px 28px",
-                  borderRadius: "20px",
-                  background: tier.popular
-                    ? "linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.08) 100%)"
-                    : "rgba(255,255,255,0.03)",
-                  border: tier.popular
-                    ? "1px solid rgba(59,130,246,0.3)"
-                    : "1px solid rgba(255,255,255,0.07)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {tier.popular && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "16px",
-                      right: "16px",
-                      padding: "3px 10px",
-                      borderRadius: "9999px",
-                      background: "linear-gradient(135deg, #3B82F6, #8B5CF6)",
-                      fontSize: "0.6875rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.05em",
-                      color: "white",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Most popular
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 700,
-                    color: tier.accent,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    marginBottom: "8px",
-                  }}
-                >
-                  {tier.name}
-                </div>
-
-                <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "4px" }}>
-                  <span
-                    style={{
-                      fontSize: "2.5rem",
-                      fontWeight: 800,
-                      color: "#F1F5F9",
-                      letterSpacing: "-0.04em",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {tier.price}
-                  </span>
-                  <span style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 400 }}>
-                    {tier.period}
-                  </span>
-                </div>
-
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#64748B",
-                    margin: "0 0 24px",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {tier.desc}
-                </p>
-
-                <a
-                  href="#waitlist"
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    padding: "11px 20px",
-                    borderRadius: "10px",
-                    background: tier.popular
-                      ? "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)"
-                      : "rgba(255,255,255,0.06)",
-                    border: tier.popular ? "none" : "1px solid rgba(255,255,255,0.1)",
-                    color: "white",
-                    fontSize: "0.9375rem",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                    marginBottom: "24px",
-                    boxShadow: tier.popular ? "0 0 24px rgba(59,130,246,0.3)" : "none",
-                  }}
-                >
-                  {tier.cta}
-                </a>
-
-                <div className="divider" style={{ marginBottom: "24px" }} />
-
-                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {tier.features.map((f, fi) => (
-                    <li
-                      key={fi}
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "10px",
-                        fontSize: "0.875rem",
-                        color: "#94A3B8",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      <span
-                        style={{
-                          flexShrink: 0,
-                          width: "18px",
-                          height: "18px",
-                          borderRadius: "50%",
-                          background: `${tier.accent}18`,
-                          border: `1px solid ${tier.accent}30`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: tier.accent,
-                          marginTop: "1px",
-                        }}
-                      >
-                        <IconCheck />
-                      </span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── FAQ ────────────────────────────────────────────────────────── */}
-      <section
-        id="faq"
-        style={{
-          padding: "100px 24px",
-          maxWidth: "800px",
-          margin: "0 auto",
-        }}
-      >
-        <ScrollReveal>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <span className="section-label" style={{ marginBottom: "20px", display: "inline-flex" }}>
-              FAQ
-            </span>
-            <h2
-              style={{
-                fontSize: "clamp(1.875rem, 4vw, 2.5rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: "#F1F5F9",
-                lineHeight: 1.2,
-                margin: "16px 0 0",
-              }}
-            >
-              Questions we&apos;ve already
-              <br />
-              <span className="gradient-text">gotten from beta users.</span>
-            </h2>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={80}>
-          <FAQAccordion />
-        </ScrollReveal>
-      </section>
-
-      {/* ── HUMAN ELEMENT ─────────────────────────────────────────────── */}
-      <section
-        style={{
-          padding: "80px 24px",
-          maxWidth: "680px",
-          margin: "0 auto",
-          textAlign: "center",
-        }}
-      >
-        <ScrollReveal>
-          <div
-            style={{
-              padding: "40px 36px",
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: "20px",
-              position: "relative",
-            }}
-          >
-            {/* Quote mark */}
-            <div
-              style={{
-                position: "absolute",
-                top: "20px",
-                left: "28px",
-                fontSize: "3rem",
-                lineHeight: 1,
-                color: "rgba(59,130,246,0.2)",
-                fontFamily: "Georgia, serif",
-                fontWeight: 700,
-              }}
-            >
-              &ldquo;
-            </div>
-
-            <p
-              style={{
-                fontSize: "1.125rem",
-                lineHeight: 1.7,
-                color: "#CBD5E1",
-                margin: "0 0 28px",
-                fontStyle: "italic",
-                paddingTop: "8px",
-              }}
-            >
-              I built [PRODUCT_NAME] because I watched a 10x engineer silently spiral for three
-              months — and found out in an exit interview. Every signal was there. No
-              one was reading them.
-            </p>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  color: "white",
-                  flexShrink: 0,
-                }}
-              >
-                Y
-              </div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#F1F5F9" }}>
-                  Yash Agarwal
-                </div>
-                <div style={{ fontSize: "0.8125rem", color: "#64748B" }}>
-                  Co-founder &amp; CEO, [PRODUCT_NAME]
-                </div>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      <div className="divider" style={{ maxWidth: "var(--content-max-width)", margin: "0 auto" }} />
-
-      {/* ── FINAL CTA ──────────────────────────────────────────────────── */}
-      <section style={{ padding: "0 24px 100px" }}>
-        <ScrollReveal>
-          <div
-            style={{
-              maxWidth: "860px",
-              margin: "0 auto",
-              borderRadius: "24px",
-              padding: "72px 48px",
-              textAlign: "center",
-              background: `
-                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.2) 0%, transparent 65%),
-                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(139,92,246,0.15) 0%, transparent 55%),
-                rgba(255,255,255,0.03)
-              `,
-              border: "1px solid rgba(59,130,246,0.2)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Grid overlay */}
-            <div
-              className="grid-pattern"
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: 0.3,
-                pointerEvents: "none",
-              }}
-            />
-
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
-                <span className="section-label">
-                  Early access open
-                </span>
-              </div>
-
-              <h2
-                style={{
-                  fontSize: "clamp(1.875rem, 5vw, 3rem)",
-                  fontWeight: 800,
-                  letterSpacing: "-0.04em",
-                  color: "#F8FAFC",
-                  lineHeight: 1.1,
-                  margin: "0 0 20px",
-                }}
-              >
-                Don&apos;t wait for the problem
-                <br />
-                <span className="gradient-text-hero">to find you.</span>
-              </h2>
-
-              <p
-                style={{
-                  fontSize: "1.0625rem",
-                  color: "#64748B",
-                  maxWidth: "460px",
-                  margin: "0 auto 40px",
-                  lineHeight: 1.6,
-                }}
-              >
-                Join the waitlist. First team connections are free.
-                Setup takes under 10 minutes.
-              </p>
-
-              <div
-                style={{
-                  maxWidth: "520px",
-                  margin: "0 auto",
-                }}
-              >
+          <ScrollReveal delay={400}>
+            <div id="waitlist" className="w-full max-w-md mx-auto relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/0 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+              <div className="relative relative p-1 rounded-xl bg-black border border-white/10 glass-panel">
                 <WaitlistForm />
               </div>
-              <p style={{ marginTop: "12px", fontSize: "0.75rem", color: "#475569", textAlign: "center" }}>
-                No spam. We respect your{" "}
-                <a href="/privacy" style={{ color: "#64748B", textDecoration: "underline" }}>privacy</a>.
-              </p>
-
-              <p
-                style={{
-                  marginTop: "20px",
-                  fontSize: "0.8125rem",
-                  color: "#475569",
-                }}
-              >
-                No credit card. No commitment. Free during beta.{" "}
-                <a href="/privacy" style={{ color: "#475569", textDecoration: "underline" }}>Privacy policy</a>.
-              </p>
+              <p className="mt-4 text-xs text-white/40 font-mono text-center tracking-wide">JOINED BY {displayCount} ENG LEADERS</p>
             </div>
+          </ScrollReveal>
+        </div>
+
+        {/* Dashboard floating */}
+        <ScrollReveal delay={600} className="w-full max-w-5xl mt-24 relative z-20">
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-b from-white/10 to-transparent rounded-2xl blur-xl opacity-50" />
+            <DashboardMockup />
           </div>
         </ScrollReveal>
+        
+        {/* Glow behind dash */}
+        <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-[80%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────────── */}
-      <footer
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          padding: "40px 24px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "var(--content-max-width)",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
-        >
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "6px",
-                background: "linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="12" r="5" />
-                <circle cx="12" cy="12" r="9" />
-              </svg>
+      <div className="divider w-full" />
+
+      {/* THE PROBLEM / HOW IT WORKS */}
+      <section id="how-it-works" className="py-32 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 lg:gap-24 items-start">
+            
+            {/* Sticky Left */}
+            <div className="md:sticky md:top-32">
+              <ScrollReveal>
+                <div className="section-label mb-6">The Quiet Crisis</div>
+                <h2 className="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-tight mb-6">
+                  Your team is sending signals.<br/>
+                  <span className="text-white/40">You're missing them.</span>
+                </h2>
+                <p className="text-white/60 text-lg leading-relaxed max-w-md">
+                  Surveys rely on honest answers. Check-ins require context. Radar analyzes ambient data to find the silent blockers before they surface in an exit interview.
+                </p>
+              </ScrollReveal>
             </div>
-            <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "#475569", letterSpacing: "-0.02em" }}>
-              [PRODUCT_NAME]
-            </span>
+
+            {/* Scrolling Right */}
+            <div className="flex flex-col gap-6">
+              {[
+                { title: "The Quiet Performer", icon: <Activity className="w-5 h-5 text-emerald-400" />, prob: "Commits drop 80%. Slack goes silent.", res: "Radar detects the anomaly on day 2." },
+                { title: "The Silent Blocker", icon: <GitMerge className="w-5 h-5 text-amber-400" />, prob: "Ticket in-progress for 11 days. No PR.", res: "Radar alerts you to the stalled momentum." },
+                { title: "Meeting Debt", icon: <BellRing className="w-5 h-5 text-rose-400" />, prob: "8h meeting load. Skipping lunch to code.", res: "Radar identifies imminent burnout." }
+              ].map((card, i) => (
+                <ScrollReveal key={i} delay={i * 150}>
+                  <div className="glass-card p-8 group">
+                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      {card.icon}
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">{card.title}</h3>
+                    <div className="text-sm text-white/50 mb-3 p-3 bg-white/5 rounded-md border-l-2 border-white/10">
+                      <span className="block text-[10px] font-mono tracking-widest uppercase mb-1">Old Way</span>
+                      {card.prob}
+                    </div>
+                    <div className="text-sm font-medium text-emerald-100 p-3 bg-emerald-500/10 rounded-md border-l-2 border-emerald-500">
+                      <span className="block text-[10px] font-mono tracking-widest text-emerald-500 uppercase mb-1">With Radar</span>
+                      {card.res}
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+
           </div>
+        </div>
+      </section>
 
-          {/* Links */}
-          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-            {[
-              { label: "Privacy", href: "/privacy" },
-              { label: "Terms", href: "/terms" },
-              { label: "Contact", href: "mailto:hello@radariq.io" },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                style={{
-                  fontSize: "0.875rem",
-                  color: "#475569",
-                  textDecoration: "none",
-                  transition: "color 0.15s",
-                }}
-              >
-                {label}
-              </a>
-            ))}
+      <div className="divider w-full max-w-7xl mx-auto" />
+
+      {/* FEATURES ARCHITECTURE */}
+      <section id="features" className="py-32 px-6 relative z-10">
+        <ScrollReveal>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+             <div className="section-label mb-6">Capabilities</div>
+             <h2 className="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em] leading-tight">
+               Built for modern orgs.
+             </h2>
           </div>
+        </ScrollReveal>
 
-          <p style={{ fontSize: "0.8125rem", color: "#334155", margin: 0 }}>
-            © {new Date().getFullYear()} [PRODUCT_NAME]. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-// ── Inline mini dashboard for the hero (avoids prop-drilling DashboardMockup) ──
-// Uses the same data but rendered inline to allow hero-specific styling
-function HeroDashboard() {
-  const MEMBERS = [
-    { name: "Alex Chen", role: "Eng Manager", pulse: 82, alert: null as null | { label: string; color: string; bg: string } },
-    { name: "Priya Nair", role: "Senior SWE", pulse: 71, alert: null as null | { label: string; color: string; bg: string } },
-    { name: "Jordan Lee", role: "Product Mgr", pulse: 44, alert: { label: "Overloaded", color: "#D97706", bg: "#FFFBEB" } },
-    { name: "Sam Torres", role: "Senior SWE", pulse: 18, alert: { label: "Gone quiet", color: "#DC2626", bg: "#FEF2F2" } },
-    { name: "Mia Kapoor", role: "Designer", pulse: 77, alert: null as null | { label: string; color: string; bg: string } },
-  ];
-
-  return (
-    <div style={{ background: "#F8FAFC", padding: "16px" }}>
-      {/* Header strip */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "12px",
-        }}
-      >
-        <div style={{ fontSize: "13px", fontWeight: 700, color: "#0F172A" }}>Team Overview</div>
-        <div
-          style={{
-            display: "flex",
-            gap: "6px",
-            fontSize: "10px",
-            fontWeight: 500,
-          }}
-        >
-          <span style={{ padding: "3px 8px", borderRadius: "4px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}>2 exceptions</span>
-          <span style={{ padding: "3px 8px", borderRadius: "4px", background: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0" }}>3 healthy</span>
-        </div>
-      </div>
-
-      {/* Mini team table */}
-      <div style={{ borderRadius: "8px", overflow: "hidden", border: "1px solid #E2E8F0" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr auto auto",
-            padding: "5px 12px",
-            background: "#F1F5F9",
-            borderBottom: "1px solid #E2E8F0",
-          }}
-        >
-          {["Person", "Pulse", "Status"].map((h) => (
-            <span key={h} style={{ fontSize: "9px", fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              {h}
-            </span>
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { title: "Pulse Brief", icon: <RefreshCcw className="w-6 h-6 text-white" />, desc: "Every morning, a ranked list of who needs attention." },
+            { title: "Value Score", icon: <Zap className="w-6 h-6 text-white" />, desc: "Tasks scored automatically by AI on speed and complexity." },
+            { title: "Zero Install", icon: <Eye className="w-6 h-6 text-white" />, desc: "Runs silently on your existing OAuth connections." },
+            { title: "Privacy First", icon: <Shield className="w-6 h-6 text-white" />, desc: "Analyzes patterns, never content. No screen recording." }
+          ].map((f, i) => (
+             <ScrollReveal key={i} delay={i * 100} className={i === 0 ? "md:col-span-2" : i === 3 ? "md:col-span-2" : ""}>
+               <div className="glass-card h-full p-8 md:p-10 hover:bg-white/[0.05] relative overflow-hidden group">
+                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                 <div className="w-12 h-12 rounded-xl border border-white/20 bg-white/5 flex items-center justify-center mb-8">
+                   {f.icon}
+                 </div>
+                 <h3 className="text-2xl font-bold mb-3">{f.title}</h3>
+                 <p className="text-white/60 text-lg leading-relaxed">{f.desc}</p>
+                 <ArrowRight className="absolute bottom-10 right-10 w-6 h-6 text-white/20 group-hover:text-white/60 transition-colors" />
+               </div>
+             </ScrollReveal>
           ))}
         </div>
-        {MEMBERS.map((m, i) => (
-          <div
-            key={m.name}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto auto",
-              padding: "8px 12px",
-              borderBottom: i < MEMBERS.length - 1 ? "1px solid #F1F5F9" : "none",
-              alignItems: "center",
-              background: m.alert ? `${m.alert.bg}80` : "#FFFFFF",
-              gap: "12px",
-            }}
-          >
-            <div>
-              <div style={{ fontSize: "11px", fontWeight: 600, color: "#0F172A" }}>{m.name}</div>
-              <div style={{ fontSize: "9px", color: "#94A3B8" }}>{m.role}</div>
-            </div>
-            <span
-              style={{
-                fontSize: "12px",
-                fontWeight: 700,
-                color: m.pulse >= 70 ? "#059669" : m.pulse >= 40 ? "#D97706" : "#DC2626",
-                letterSpacing: "-0.3px",
-              }}
-            >
-              {m.pulse}
-            </span>
-            <div>
-              {m.alert ? (
-                <span
-                  style={{
-                    fontSize: "9px",
-                    fontWeight: 600,
-                    padding: "2px 6px",
-                    borderRadius: "3px",
-                    background: m.alert.bg,
-                    color: m.alert.color,
-                  }}
-                >
-                  {m.alert.label}
-                </span>
-              ) : (
-                <span style={{ fontSize: "9px", color: "#CBD5E1" }}>—</span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      </section>
 
-      {/* Alerts strip */}
-      <div
-        style={{
-          marginTop: "10px",
-          padding: "10px 12px",
-          background: "#FFF7ED",
-          border: "1px solid #FED7AA",
-          borderRadius: "7px",
-          fontSize: "11px",
-          color: "#C2410C",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-        }}
-      >
-        <span style={{ fontWeight: 700 }}>HIGH</span>
-        <span style={{ color: "#7C2D12" }}>Sam Torres has been quiet for 6 days — DM cadence dropped 94%</span>
-      </div>
+      {/* FINAL CTA */}
+      <section className="py-32 px-6 relative z-10 text-center">
+         <ScrollReveal>
+           <h2 className="font-display text-5xl md:text-7xl font-bold tracking-[-0.04em] mb-8">
+             Access the <span className="text-accent-amber">Radar</span> beta.
+           </h2>
+           <p className="text-xl text-white/50 max-w-xl mx-auto mb-10">
+             First team connections are free. <br/>Setup takes under 10 minutes.
+           </p>
+           <div className="w-full max-w-sm mx-auto">
+             <WaitlistForm />
+           </div>
+         </ScrollReveal>
+      </section>
+
     </div>
   );
 }

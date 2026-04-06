@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { motion, useInView } from "framer-motion";
 
 interface Props {
   children: ReactNode;
@@ -11,30 +12,22 @@ interface Props {
 
 export default function ScrollReveal({ children, delay = 0, className = "", style }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // Apply delay via inline style then add class
-          el.style.transitionDelay = delay ? `${delay}ms` : "0ms";
-          el.classList.add("visible");
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
+  const isInView = useInView(ref, { once: true, margin: "0px 0px -40px 0px" });
 
   return (
-    <div ref={ref} className={`reveal ${className}`} style={style}>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 35, filter: "blur(4px)" }}
+      animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+      transition={{
+        duration: 0.8,
+        delay: delay / 1000,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      className={className}
+      style={style}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

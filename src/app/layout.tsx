@@ -9,8 +9,15 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Radar — Management Intelligence",
-  description: "Know what is really happening with your team, before it becomes a problem.",
+  title: "Radar — Stop being the last to know.",
+  description:
+    "Radar reads your team's work signals — GitHub, Slack, Jira — to surface quiet risks before they become surprises. No surveys. No check-ins. No behavior change required.",
+  openGraph: {
+    title: "Radar — Management Intelligence",
+    description:
+      "Stop being the last to know. Radar surfaces quiet risks before they become surprises.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -19,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full bg-white text-gray-900">
+    <html lang="en" className={`${geistSans.variable} h-full antialiased`} style={{ colorScheme: "dark" }}>
+      <body style={{ minHeight: "100%", background: "#020817", color: "#F1F5F9" }}>
         {children}
         <Analytics />
       </body>

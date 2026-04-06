@@ -15,12 +15,12 @@ async function getWaitlistCount(): Promise<number> {
 }
 
 export const metadata = {
-  title: "Radar — Know what is really happening with your team, before it becomes a problem.",
+  title: "Radar — Stop being the last to know.",
   description:
-    "Radar watches the signals your team already creates and tells managers only what needs attention. No timesheets. No surveillance. Just clarity.",
+    "Radar reads your team's work signals — GitHub, Slack, Calendar — to surface quiet risks before they become surprises. No surveys. No check-ins. No behavior change required.",
   openGraph: {
     title: "Radar — Management Intelligence",
-    description: "Know what is really happening with your team, before it becomes a problem.",
+    description: "Stop being the last to know. Radar surfaces quiet risks before they become surprises.",
     type: "website",
   },
 };
@@ -262,11 +262,9 @@ export default async function LandingPage() {
               margin: "0 0 20px",
             }}
           >
-            Stop guessing.
+            Stop being the last
             <br />
-            Know exactly what
-            <br />
-            your team shipped.
+            to know.
           </h1>
 
           <p
@@ -278,8 +276,9 @@ export default async function LandingPage() {
               maxWidth: "440px",
             }}
           >
-            Radar watches the signals your team already creates and surfaces only
-            what needs your attention. No timesheets. No surveillance. Just clarity.
+            Radar reads your team's work signals — GitHub, Slack, Calendar — to
+            surface quiet risks before they become surprises. No surveys. No check-ins.
+            No behavior change required.
           </p>
 
           {/* Trust badges row */}
@@ -292,9 +291,9 @@ export default async function LandingPage() {
             }}
           >
             {[
-              { icon: <IconCheck />, text: "No timesheets" },
-              { icon: <IconCheck />, text: "No surveillance" },
-              { icon: <IconCheck />, text: "14-day free trial" },
+              { icon: <IconCheck />, text: "No surveys" },
+              { icon: <IconCheck />, text: "No check-ins" },
+              { icon: <IconCheck />, text: "No behavior change" },
             ].map((b) => (
               <div
                 key={b.text}
@@ -515,20 +514,20 @@ export default async function LandingPage() {
             {
               step: "01",
               icon: <IconPlug />,
-              title: "Connect your tools",
-              body: "Link Slack, GitHub, Jira, or Google Calendar. Takes under 10 minutes. No agents to install, no IT tickets.",
+              title: "Connect GitHub, Slack, Calendar",
+              body: "Takes under 10 minutes. No agents to install, no IT tickets. Radar reads the signals your team already creates.",
             },
             {
               step: "02",
               icon: <IconBuilding />,
-              title: "Map your org",
-              body: "Import your team structure from a CSV or build it in Radar. Employees are grouped by team, reporting line, and role.",
+              title: "Radar computes baselines",
+              body: "Import your org structure and Radar immediately starts computing delivery baselines — velocity, meeting load, engagement patterns — per person and per team.",
             },
             {
               step: "03",
               icon: <IconBell />,
               title: "Get your daily brief",
-              body: "Every morning, your intelligence report is ready. Exceptions only — people who are blocked, burning out, or going quiet.",
+              body: "Every morning you get a brief with quiet risk signals only — attrition risk, stalled work, meeting debt, overload. Nothing else.",
             },
           ].map((s, i) => (
             <div
@@ -580,6 +579,107 @@ export default async function LandingPage() {
                 }}
               >
                 {s.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── What you see ────────────────────────────────────────────── */}
+      <section
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          maxWidth: "var(--content-max-width)",
+          margin: "0 auto",
+          padding: "72px 24px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "var(--font-size-xs)",
+            fontWeight: "var(--font-weight-semibold)",
+            letterSpacing: "var(--letter-spacing-widest)",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            marginBottom: "8px",
+          }}
+        >
+          What you see
+        </p>
+        <h2
+          style={{
+            fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
+            fontWeight: "var(--font-weight-bold)",
+            letterSpacing: "var(--letter-spacing-tight)",
+            margin: "0 0 40px",
+            color: "var(--text-primary)",
+          }}
+        >
+          Four early-warning signals.
+        </h2>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {[
+            {
+              signal: "Attrition risk",
+              icon: "↗",
+              description: "Engagement patterns that precede resignation — flagged 3 weeks before someone quits.",
+              color: "#EF4444",
+            },
+            {
+              signal: "Stalled work",
+              icon: "⏸",
+              description: "Pull requests, tasks, and deliverables that have gone quiet without explanation.",
+              color: "#F59E0B",
+            },
+            {
+              signal: "Meeting debt",
+              icon: "📅",
+              description: "Teams spending more calendar time in meetings than shipping — before it kills velocity.",
+              color: "#8B5CF6",
+            },
+            {
+              signal: "Overload",
+              icon: "⚡",
+              description: "Workload concentration and after-hours activity that predicts burnout before it lands.",
+              color: "#2563EB",
+            },
+          ].map((s) => (
+            <div
+              key={s.signal}
+              style={{
+                padding: "24px",
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-default)",
+                borderRadius: "var(--radius-xl)",
+                borderTop: `3px solid ${s.color}`,
+              }}
+            >
+              <div style={{ fontSize: "20px", marginBottom: "12px" }}>{s.icon}</div>
+              <h3
+                style={{
+                  fontSize: "var(--font-size-base)",
+                  fontWeight: "var(--font-weight-semibold)",
+                  margin: "0 0 8px",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {s.signal}
+              </h3>
+              <p
+                style={{
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--text-secondary)",
+                  lineHeight: "var(--line-height-relaxed)",
+                  margin: 0,
+                }}
+              >
+                {s.description}
               </p>
             </div>
           ))}
@@ -753,9 +853,9 @@ export default async function LandingPage() {
         >
           {[
             { value: "< 10 min", label: "Setup time", sub: "No engineering required" },
-            { value: "1 daily", label: "Check-in per employee", sub: "Under 5 minutes to complete" },
+            { value: "1 daily", label: "Brief per manager", sub: "Quiet risk signals only — nothing else" },
             { value: "3× faster", label: "Exception identification", sub: "vs. manual 1:1s and status meetings" },
-            { value: "Zero", label: "New surveillance tools", sub: "Uses signals your team already creates" },
+            { value: "Zero", label: "New tools for your team", sub: "Reads signals they already create" },
           ].map((stat, i) => (
             <div
               key={stat.label}
@@ -786,6 +886,50 @@ export default async function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* ── Competitive positioning strip ───────────────────────────── */}
+      <div
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          borderBottom: "1px solid var(--border-default)",
+          background: "var(--bg-subtle)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "var(--content-max-width)",
+            margin: "0 auto",
+            padding: "32px 24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "var(--font-size-xs)",
+              fontWeight: "var(--font-weight-semibold)",
+              letterSpacing: "var(--letter-spacing-wide)",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            vs. the status quo
+          </span>
+          <p
+            style={{
+              fontSize: "var(--font-size-base)",
+              color: "var(--text-secondary)",
+              fontStyle: "italic",
+              margin: 0,
+            }}
+          >
+            &ldquo;Culture Amp and Lattice tell you what your team said last quarter. Radar tells you what&rsquo;s happening right now.&rdquo;
+          </p>
+        </div>
+      </div>
 
       {/* ── Pricing ─────────────────────────────────────────────────── */}
       <section
@@ -957,7 +1101,7 @@ export default async function LandingPage() {
         </p>
       </section>
 
-      {/* ── Ghost employee callout ───────────────────────────────────── */}
+      {/* ── The problem ─────────────────────────────────────────────── */}
       <section
         style={{
           borderTop: "1px solid var(--border-default)",
@@ -998,8 +1142,8 @@ export default async function LandingPage() {
               margin: 0,
             }}
           >
-            Most remote teams have ghost employees — people who appear active but
-            deliver little. Current tools measure presence, not value.
+            Most leadership tools ask your team how they feel. By the time you
+            hear the answer, the problem is already expensive.
           </p>
           <p
             style={{
@@ -1010,9 +1154,9 @@ export default async function LandingPage() {
               margin: 0,
             }}
           >
-            Radar was built to solve this. One lightweight daily check-in per
-            employee. One AI-synthesized intelligence briefing per manager. Every
-            day.
+            Radar connects to the tools your team already uses — GitHub, Slack,
+            Calendar — and surfaces quiet risk signals before they become
+            surprises. No new process. No behavior change required from your team.
           </p>
           <a
             href="/demo"

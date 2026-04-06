@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           update: {
             stripeCustomerId: session.customer as string,
             stripeSubscriptionId: session.subscription as string,
-            plan: interval === "annual" ? "ANNUAL" : "MONTHLY",
+            plan: "GROWTH",
             status,
             currentPeriodEnd: new Date(
               stripeSubscription.items.data[0].current_period_end * 1000
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
             workspaceId,
             stripeCustomerId: session.customer as string,
             stripeSubscriptionId: session.subscription as string,
-            plan: interval === "annual" ? "ANNUAL" : "MONTHLY",
+            plan: "GROWTH",
             status,
             currentPeriodEnd: new Date(
               stripeSubscription.items.data[0].current_period_end * 1000

@@ -7,8 +7,14 @@ import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Deferred to request-time so missing env vars don't break static build analysis
+let _anthropic: Anthropic | undefined;
+let _resend: Resend | undefined;
+function getClients() {
+  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!);
+  return { anthropic: _anthropic, resend: _resend };
+}
 
 type LeadershipRole = "CEO" | "MANAGER" | "HR" | "IC";
 
@@ -61,6 +67,7 @@ Generate a brief daily intelligence brief with:
 
 Reply in JSON: { "headline": "...", "narrative": "...", "signals": ["...", ...], "actions": ["...", ...] }`;
 
+  const { anthropic } = getClients();
   const response = await anthropic.messages.create({
     model: "claude-opus-4-6",
     max_tokens: 600,
@@ -189,6 +196,7 @@ export async function GET(request: Request) {
 
         // Send email
         const emailHtml = renderBriefEmail(briefContent, workspace.name, today, role);
+        const { resend } = getClients();
         await resend.emails.send({
           from: process.env.EMAIL_FROM ?? "brief@yourdomain.com",
           to: leader.user.email,

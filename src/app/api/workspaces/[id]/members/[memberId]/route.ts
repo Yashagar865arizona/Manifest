@@ -53,7 +53,7 @@ export async function PATCH(
       select: { leadershipRole: true, status: true },
     });
     const seatCounts = computeSeatCounts(members);
-    const interval: BillingInterval = subscription.plan === "ANNUAL" ? "annual" : "monthly";
+    const interval: BillingInterval = ("monthly" as BillingInterval);
 
     // Fire-and-forget: don't block the response on Stripe API latency
     syncSubscriptionSeats({

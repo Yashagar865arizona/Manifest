@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { getWorkspaceSignalSnapshots, computePulseScore } from "@/lib/signals";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { AskBar } from "@/components/dashboard/AskBar";
 import type { AnomalyType, SignalSeverity } from "@prisma/client";
 
@@ -76,6 +76,28 @@ export default async function DashboardPage() {
 
   const today = format(new Date(), "yyyy-MM-dd");
 
+  // Fetch 7-day pulse history for sparklines
+  const sparkHistory = await (async () => {
+    try {
+      const dates = Array.from({ length: 7 }, (_, i) =>
+        format(subDays(new Date(), 6 - i), "yyyy-MM-dd")
+      );
+      const rows = await db.rawSignal.groupBy({
+        by: ["signalDate"],
+        where: {
+          workspaceId: workspace.id,
+          signalDate: { in: dates },
+        },
+        _avg: { value: true },
+        _count: { value: true },
+      });
+      const byDate = Object.fromEntries(rows.map((r) => [r.signalDate, r._avg.value ?? 50]));
+      return dates.map((d) => byDate[d] ?? null);
+    } catch {
+      return null;
+    }
+  })();
+
   const allSnapshots = await getWorkspaceSignalSnapshots(workspace.id, today);
 
   // Filter by role
@@ -130,6 +152,7 @@ export default async function DashboardPage() {
           label="Team pulse"
           value={avgPulse !== null ? `${avgPulse}/100` : "—"}
           color={avgPulse === null ? "default" : avgPulse >= 70 ? "green" : avgPulse >= 40 ? "yellow" : "red"}
+          sparkData={sparkHistory?.filter((v): v is number => v !== null)}
         />
         <MetricCard
           label="Active alerts"
@@ -279,23 +302,47 @@ export default async function DashboardPage() {
   );
 }
 
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  if (data.length < 2) return null;
+  const w = 56;
+  const h = 22;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const step = w / (data.length - 1);
+  const points = data
+    .map((v, i) => `${i * step},${h - ((v - min) / range) * (h - 4) - 2}`)
+    .join(" ");
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" aria-hidden="true">
+      <polyline points={points} stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MetricCard({
   label,
   value,
   color,
   sublabel,
+  sparkData,
 }: {
   label: string;
   value: string;
   color: "green" | "red" | "yellow" | "default";
   sublabel?: string;
+  sparkData?: number[];
 }) {
   const dotColors = { green: "bg-green-500", red: "bg-red-500", yellow: "bg-yellow-500", default: "bg-gray-300" };
+  const sparkColors = { green: "#059669", red: "#DC2626", yellow: "#D97706", default: "#94A3B8" };
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
-      <div className="flex items-center gap-2 mb-1">
-        <div className={`w-2 h-2 rounded-full ${dotColors[color]}`} />
-        <p className="text-xs text-gray-500">{label}</p>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${dotColors[color]}`} />
+          <p className="text-xs text-gray-500">{label}</p>
+        </div>
+        {sparkData && <Sparkline data={sparkData} color={sparkColors[color]} />}
       </div>
       <p className="text-2xl font-semibold text-gray-900 tracking-tight">{value}</p>
       {sublabel && <p className="text-xs text-gray-400 mt-0.5">{sublabel}</p>}

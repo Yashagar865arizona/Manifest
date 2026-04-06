@@ -43,8 +43,7 @@ export async function GET(request: Request) {
   });
   const seatCounts = computeSeatCounts(members);
 
-  const interval: BillingInterval =
-    subscription?.plan === "ANNUAL" ? "annual" : "monthly";
+  const interval: BillingInterval = "monthly";
   const estimate = computeInvoiceEstimate(seatCounts, interval);
 
   const trialDaysLeft =

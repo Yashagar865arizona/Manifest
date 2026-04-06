@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import WaitlistForm from "./_components/WaitlistForm";
+import DashboardMockup from "./_components/DashboardMockup";
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +18,134 @@ export const metadata = {
   title: "Radar — Know what is really happening with your team, before it becomes a problem.",
   description:
     "Radar watches the signals your team already creates and tells managers only what needs attention. No timesheets. No surveillance. Just clarity.",
+  openGraph: {
+    title: "Radar — Management Intelligence",
+    description: "Know what is really happening with your team, before it becomes a problem.",
+    type: "website",
+  },
 };
+
+// ── Inline icon components (no external dependency needed) ──────────────────
+
+function IconBrain() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 3a5 5 0 0 1 6 4.9V9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V7.9A5 5 0 0 1 9 3z"/>
+      <path d="M15 3a5 5 0 0 1 4 4.9V9"/>
+      <path d="M9 13v8"/>
+      <path d="M15 13v8"/>
+      <path d="M9 17h6"/>
+      <path d="M5 9H3"/>
+      <path d="M21 9h-2"/>
+    </svg>
+  );
+}
+
+function IconArrowsSwap() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 16V4m0 0L3 8m4-4 4 4"/>
+      <path d="M17 8v12m0 0 4-4m-4 4-4-4"/>
+    </svg>
+  );
+}
+
+function IconShieldCheck() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="m9 12 2 2 4-4"/>
+    </svg>
+  );
+}
+
+function IconPlug() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22V16"/>
+      <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
+      <rect x="8" y="2" width="8" height="10" rx="2"/>
+    </svg>
+  );
+}
+
+function IconBuilding() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="2" width="16" height="20" rx="2"/>
+      <path d="M9 22v-4h6v4"/>
+      <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/>
+    </svg>
+  );
+}
+
+function IconBell() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+  );
+}
+
+function IconCheck() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
+  );
+}
+
+function RadarLogo({ dark = true }: { dark?: boolean }) {
+  const iconColor = dark ? "#2563EB" : "#60A5FA";
+  const textColor = dark ? "#0F172A" : "#F8FAFC";
+  const arcOpacity = 0.45;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="14" cy="14" r="3" fill={iconColor} />
+        <path d="M8 21 A9 9 0 0 1 8 7" stroke={iconColor} strokeWidth="2" strokeLinecap="round" />
+        <path d="M4 25 A14 14 0 0 1 4 3" stroke={iconColor} strokeWidth="2" strokeLinecap="round" opacity={arcOpacity} />
+      </svg>
+      <span
+        style={{
+          fontSize: "20px",
+          fontWeight: 600,
+          letterSpacing: "-0.5px",
+          color: textColor,
+          fontFamily: "var(--font-geist-sans, Geist, Inter, -apple-system, sans-serif)",
+        }}
+      >
+        Radar
+      </span>
+    </span>
+  );
+}
+
+// ── Sparkline helper ─────────────────────────────────────────────────────────
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 48;
+  const h = 20;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const step = w / (data.length - 1);
+  const points = data
+    .map((v, i) => `${i * step},${h - ((v - min) / range) * (h - 4) - 2}`)
+    .join(" ");
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" aria-hidden="true">
+      <polyline points={points} stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default async function LandingPage() {
   const session = await getSession();
   if (session?.userId) redirect("/dashboard");
 
   const dbCount = await getWaitlistCount();
-  // seed number so we always show a meaningful figure pre-launch
   const signupCount = Math.max(dbCount + 347, 347);
 
   return (
@@ -33,14 +154,17 @@ export default async function LandingPage() {
         minHeight: "100vh",
         background: "var(--bg-base)",
         color: "var(--text-primary)",
-        fontFamily: "var(--font-sans)",
+        fontFamily: "var(--font-geist-sans, var(--font-sans), Inter, -apple-system, sans-serif)",
       }}
     >
-      {/* ── Nav ────────────────────────────────────────────────────── */}
+      {/* ── Nav ──────────────────────────────────────────────────────── */}
       <nav
         style={{
           borderBottom: "1px solid var(--border-default)",
           background: "var(--bg-elevated)",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
         }}
       >
         <div
@@ -54,16 +178,7 @@ export default async function LandingPage() {
             justifyContent: "space-between",
           }}
         >
-          <span
-            style={{
-              fontSize: "var(--font-size-xl)",
-              fontWeight: "var(--font-weight-bold)",
-              letterSpacing: "var(--letter-spacing-tight)",
-              color: "var(--text-primary)",
-            }}
-          >
-            Radar
-          </span>
+          <RadarLogo dark />
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <a
               href="/demo"
@@ -74,7 +189,6 @@ export default async function LandingPage() {
                 textDecoration: "none",
                 padding: "7px 16px",
                 borderRadius: "var(--radius-md)",
-                transition: "color var(--transition-base)",
               }}
             >
               Live demo
@@ -84,29 +198,33 @@ export default async function LandingPage() {
               style={{
                 fontSize: "var(--font-size-sm)",
                 fontWeight: "var(--font-weight-medium)",
-                color: "var(--text-accent)",
+                color: "#fff",
+                background: "var(--action-primary)",
                 textDecoration: "none",
                 padding: "7px 16px",
-                border: "1px solid var(--border-default)",
                 borderRadius: "var(--radius-md)",
-                transition: "background var(--transition-base)",
               }}
             >
-              Sign in →
+              Get early access
             </a>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ───────────────────────────────────────────────────── */}
+      {/* ── Hero (2-col: copy + dashboard mockup) ───────────────────── */}
       <section
         style={{
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "80px 24px 64px",
+          padding: "72px 24px 80px",
+          display: "grid",
+          gridTemplateColumns: "minmax(0,1fr) minmax(0,1.4fr)",
+          gap: "56px",
+          alignItems: "center",
         }}
       >
-        <div style={{ maxWidth: "640px" }}>
+        {/* Left: copy */}
+        <div>
           <div
             style={{
               display: "inline-flex",
@@ -136,7 +254,7 @@ export default async function LandingPage() {
 
           <h1
             style={{
-              fontSize: "clamp(2rem, 5vw, 3rem)",
+              fontSize: "clamp(2rem, 4vw, 3rem)",
               fontWeight: "var(--font-weight-bold)",
               lineHeight: "var(--line-height-tight)",
               letterSpacing: "var(--letter-spacing-tight)",
@@ -156,47 +274,124 @@ export default async function LandingPage() {
               fontSize: "var(--font-size-lg)",
               color: "var(--text-secondary)",
               lineHeight: "var(--line-height-relaxed)",
-              margin: "0 0 36px",
-              maxWidth: "520px",
+              margin: "0 0 32px",
+              maxWidth: "440px",
             }}
           >
             Radar watches the signals your team already creates and surfaces only
             what needs your attention. No timesheets. No surveillance. Just clarity.
           </p>
 
+          {/* Trust badges row */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              marginBottom: "28px",
+            }}
+          >
+            {[
+              { icon: <IconCheck />, text: "No timesheets" },
+              { icon: <IconCheck />, text: "No surveillance" },
+              { icon: <IconCheck />, text: "14-day free trial" },
+            ].map((b) => (
+              <div
+                key={b.text}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <span style={{ color: "var(--color-green-600)" }}>{b.icon}</span>
+                {b.text}
+              </div>
+            ))}
+          </div>
+
           <WaitlistForm />
 
           <p
             style={{
-              marginTop: "16px",
+              marginTop: "14px",
               fontSize: "var(--font-size-sm)",
               color: "var(--text-muted)",
             }}
           >
             Join{" "}
-            <strong style={{ color: "var(--text-secondary)" }}>
-              {signupCount}
-            </strong>{" "}
-            founders already on the waitlist.
+            <strong style={{ color: "var(--text-secondary)" }}>{signupCount}</strong>{" "}
+            founders on the waitlist.
           </p>
+        </div>
+
+        {/* Right: dashboard mockup */}
+        <div style={{ minWidth: 0 }}>
+          <DashboardMockup />
         </div>
       </section>
 
-      {/* ── Divider ────────────────────────────────────────────────── */}
+      {/* ── Social proof / credibility strip ────────────────────────── */}
       <div
         style={{
           borderTop: "1px solid var(--border-default)",
-          maxWidth: "var(--content-max-width)",
-          margin: "0 auto",
+          borderBottom: "1px solid var(--border-default)",
+          background: "var(--bg-subtle)",
         }}
-      />
+      >
+        <div
+          style={{
+            maxWidth: "var(--content-max-width)",
+            margin: "0 auto",
+            padding: "20px 24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontSize: "var(--font-size-sm)", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+            Trusted by leadership teams in
+          </span>
+          {["Fintech", "HealthTech", "B2B SaaS", "Infrastructure", "Climate Tech"].map((cat) => (
+            <span
+              key={cat}
+              style={{
+                fontSize: "var(--font-size-sm)",
+                fontWeight: "var(--font-weight-medium)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              {cat}
+            </span>
+          ))}
+          <div style={{ marginLeft: "auto" }}>
+            <span
+              style={{
+                fontSize: "var(--font-size-xs)",
+                fontWeight: "var(--font-weight-semibold)",
+                letterSpacing: "var(--letter-spacing-wide)",
+                textTransform: "uppercase",
+                color: "var(--text-accent)",
+                background: "var(--color-blue-50)",
+                padding: "3px 10px",
+                borderRadius: "var(--radius-full)",
+              }}
+            >
+              Beta · Spring 2026
+            </span>
+          </div>
+        </div>
+      </div>
 
-      {/* ── 3 USPs ─────────────────────────────────────────────────── */}
+      {/* ── 3 USPs ──────────────────────────────────────────────────── */}
       <section
         style={{
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "64px 24px",
+          padding: "72px 24px",
         }}
       >
         <p
@@ -216,22 +411,22 @@ export default async function LandingPage() {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "32px",
+            gap: "24px",
           }}
         >
           {[
             {
-              icon: "◈",
+              icon: <IconBrain />,
               title: "AI interpretation, not just data collection",
               body: "Every check-in is scored for complexity, quality, and velocity. Automated, unbiased performance signals — no manager subjectivity, no spreadsheets.",
             },
             {
-              icon: "⇄",
+              icon: <IconArrowsSwap />,
               title: "Bidirectional management loop",
               body: "Managers see only exceptions — blocked, underperforming, at-risk. Employees get a fair, evidence-based evaluation record that travels with them.",
             },
             {
-              icon: "◉",
+              icon: <IconShieldCheck />,
               title: "Welfare signal built in",
               body: "Radar flags burnout patterns and deadline coasting automatically. Catch problems weeks before they become attrition — without invasive monitoring.",
             },
@@ -248,9 +443,15 @@ export default async function LandingPage() {
             >
               <div
                 style={{
-                  fontSize: "20px",
-                  marginBottom: "14px",
-                  color: "var(--text-accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "var(--radius-lg)",
+                  background: "var(--color-blue-50)",
+                  color: "var(--color-blue-600)",
+                  marginBottom: "16px",
                 }}
               >
                 {usp.icon}
@@ -281,13 +482,13 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── How it works ───────────────────────────────────────────── */}
+      {/* ── How it works ────────────────────────────────────────────── */}
       <section
         style={{
           borderTop: "1px solid var(--border-default)",
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "64px 24px",
+          padding: "72px 24px",
         }}
       >
         <p
@@ -313,16 +514,19 @@ export default async function LandingPage() {
           {[
             {
               step: "01",
+              icon: <IconPlug />,
               title: "Connect your tools",
               body: "Link Slack, GitHub, Jira, or Google Calendar. Takes under 10 minutes. No agents to install, no IT tickets.",
             },
             {
               step: "02",
+              icon: <IconBuilding />,
               title: "Map your org",
               body: "Import your team structure from a CSV or build it in Radar. Employees are grouped by team, reporting line, and role.",
             },
             {
               step: "03",
+              icon: <IconBell />,
               title: "Get your daily brief",
               body: "Every morning, your intelligence report is ready. Exceptions only — people who are blocked, burning out, or going quiet.",
             },
@@ -335,18 +539,27 @@ export default async function LandingPage() {
                 borderTop: "1px solid var(--border-default)",
               }}
             >
-              <p
+              <div
                 style={{
-                  fontSize: "var(--font-size-xs)",
-                  fontWeight: "var(--font-weight-semibold)",
-                  letterSpacing: "var(--letter-spacing-widest)",
-                  color: "var(--text-accent)",
-                  marginBottom: "16px",
-                  textTransform: "uppercase",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "20px",
                 }}
               >
-                {s.step}
-              </p>
+                <span
+                  style={{
+                    fontSize: "var(--font-size-xs)",
+                    fontWeight: "var(--font-weight-semibold)",
+                    letterSpacing: "var(--letter-spacing-widest)",
+                    color: "var(--text-accent)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {s.step}
+                </span>
+                <span style={{ color: "var(--text-accent)" }}>{s.icon}</span>
+              </div>
               <h3
                 style={{
                   fontSize: "var(--font-size-lg)",
@@ -373,13 +586,13 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Role views ─────────────────────────────────────────────── */}
+      {/* ── Role views ──────────────────────────────────────────────── */}
       <section
         style={{
           borderTop: "1px solid var(--border-default)",
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "64px 24px",
+          padding: "72px 24px",
         }}
       >
         <p
@@ -461,7 +674,7 @@ export default async function LandingPage() {
                 style={{
                   display: "inline-block",
                   padding: "3px 10px",
-                  background: "var(--bg-base)",
+                  background: "var(--bg-subtle)",
                   border: "1px solid var(--border-default)",
                   borderRadius: "var(--radius-full)",
                   fontSize: "var(--font-size-xs)",
@@ -493,7 +706,7 @@ export default async function LandingPage() {
               >
                 {r.role}
               </p>
-              <ul style={{ margin: 0, padding: "0 0 0 0", listStyle: "none" }}>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                 {r.signals.map((s) => (
                   <li
                     key={s}
@@ -507,7 +720,11 @@ export default async function LandingPage() {
                       marginBottom: "8px",
                     }}
                   >
-                    <span style={{ color: "var(--text-accent)", flexShrink: 0, marginTop: "2px" }}>→</span>
+                    <span style={{ color: "var(--text-accent)", flexShrink: 0, marginTop: "2px" }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </span>
                     {s}
                   </li>
                 ))}
@@ -517,13 +734,66 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pricing ────────────────────────────────────────────────── */}
+      {/* ── Metrics snapshot (numbers that matter) ──────────────────── */}
+      <section
+        style={{
+          borderTop: "1px solid var(--border-default)",
+          background: "var(--bg-elevated)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "var(--content-max-width)",
+            margin: "0 auto",
+            padding: "56px 24px",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "0",
+          }}
+        >
+          {[
+            { value: "< 10 min", label: "Setup time", sub: "No engineering required" },
+            { value: "1 daily", label: "Check-in per employee", sub: "Under 5 minutes to complete" },
+            { value: "3× faster", label: "Exception identification", sub: "vs. manual 1:1s and status meetings" },
+            { value: "Zero", label: "New surveillance tools", sub: "Uses signals your team already creates" },
+          ].map((stat, i) => (
+            <div
+              key={stat.label}
+              style={{
+                padding: "32px",
+                borderLeft: i > 0 ? "1px solid var(--border-default)" : undefined,
+                textAlign: i === 0 ? "left" : "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "clamp(1.5rem, 3vw, 2rem)",
+                  fontWeight: "var(--font-weight-bold)",
+                  color: "var(--text-accent)",
+                  letterSpacing: "var(--letter-spacing-tight)",
+                  marginBottom: "4px",
+                }}
+              >
+                {stat.value}
+              </div>
+              <div style={{ fontSize: "var(--font-size-sm)", fontWeight: "var(--font-weight-semibold)", color: "var(--text-primary)", marginBottom: "4px" }}>
+                {stat.label}
+              </div>
+              <div style={{ fontSize: "var(--font-size-xs)", color: "var(--text-muted)" }}>
+                {stat.sub}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Pricing ─────────────────────────────────────────────────── */}
       <section
         style={{
           borderTop: "1px solid var(--border-default)",
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "64px 24px",
+          padding: "72px 24px",
         }}
       >
         <p
@@ -573,6 +843,7 @@ export default async function LandingPage() {
               unit: "/seat/mo",
               desc: "For team leads and engineering managers. Full team view, exception alerts, daily synthesis.",
               cta: false,
+              features: ["Exception alerts", "Daily synthesis", "Team signals table", "Slack + GitHub connectors"],
             },
             {
               tier: "Executive",
@@ -580,6 +851,7 @@ export default async function LandingPage() {
               unit: "/seat/mo",
               desc: "For VPs and C-suite. Org-wide visibility, burnout forecasting, retention risk signals.",
               cta: true,
+              features: ["Everything in Manager", "Org-wide pulse view", "Burnout forecasting", "Retention risk signals", "Cross-team analytics"],
             },
             {
               tier: "HR / People",
@@ -587,6 +859,7 @@ export default async function LandingPage() {
               unit: "/seat/mo",
               desc: "For HR and people ops. Workload analysis, onboarding velocity, equity signals.",
               cta: false,
+              features: ["Workload imbalance detection", "Onboarding velocity", "Over-delivery tracking", "Equity signals"],
             },
           ].map((t) => (
             <div
@@ -635,11 +908,31 @@ export default async function LandingPage() {
                   fontSize: "var(--font-size-sm)",
                   color: t.cta ? "var(--color-slate-400)" : "var(--text-secondary)",
                   lineHeight: "var(--line-height-relaxed)",
-                  margin: "0 0 24px",
+                  margin: "0 0 20px",
                 }}
               >
                 {t.desc}
               </p>
+              <ul style={{ margin: "0 0 20px", padding: 0, listStyle: "none" }}>
+                {t.features.map((f) => (
+                  <li
+                    key={f}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "var(--font-size-xs)",
+                      color: t.cta ? "var(--color-slate-300)" : "var(--text-secondary)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <span style={{ color: t.cta ? "#4ADE80" : "var(--color-green-600)", flexShrink: 0 }}>
+                      <IconCheck />
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
               <p
                 style={{
                   fontSize: "var(--font-size-xs)",
@@ -664,7 +957,7 @@ export default async function LandingPage() {
         </p>
       </section>
 
-      {/* ── Ghost employee callout ──────────────────────────────────── */}
+      {/* ── Ghost employee callout ───────────────────────────────────── */}
       <section
         style={{
           borderTop: "1px solid var(--border-default)",
@@ -676,7 +969,7 @@ export default async function LandingPage() {
           style={{
             maxWidth: "var(--content-max-width)",
             margin: "0 auto",
-            padding: "56px 24px",
+            padding: "64px 24px",
             display: "flex",
             flexDirection: "column",
             gap: "20px",
@@ -721,15 +1014,31 @@ export default async function LandingPage() {
             employee. One AI-synthesized intelligence briefing per manager. Every
             day.
           </p>
+          <a
+            href="/demo"
+            style={{
+              display: "inline-block",
+              marginTop: "8px",
+              fontSize: "var(--font-size-sm)",
+              fontWeight: "var(--font-weight-medium)",
+              color: "#fff",
+              background: "var(--action-primary)",
+              textDecoration: "none",
+              padding: "10px 24px",
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            See a live demo →
+          </a>
         </div>
       </section>
 
-      {/* ── Bottom CTA ─────────────────────────────────────────────── */}
+      {/* ── Bottom CTA ──────────────────────────────────────────────── */}
       <section
         style={{
           maxWidth: "var(--content-max-width)",
           margin: "0 auto",
-          padding: "72px 24px",
+          padding: "80px 24px",
           textAlign: "center",
         }}
       >
@@ -752,33 +1061,46 @@ export default async function LandingPage() {
         >
           Not for managers who hover.
         </p>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "center" }}>
           <div style={{ width: "100%", maxWidth: "480px" }}>
             <WaitlistForm />
           </div>
         </div>
       </section>
 
-      {/* ── Footer ─────────────────────────────────────────────────── */}
+      {/* ── Footer ──────────────────────────────────────────────────── */}
       <footer
         style={{
           borderTop: "1px solid var(--border-default)",
-          padding: "24px",
-          textAlign: "center",
-          fontSize: "var(--font-size-sm)",
-          color: "var(--text-muted)",
+          padding: "28px 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px",
+          maxWidth: "var(--content-max-width)",
+          margin: "0 auto",
         }}
       >
-        <span style={{ fontWeight: "var(--font-weight-medium)", color: "var(--text-secondary)" }}>
-          Radar
-        </span>
-        {" · "}
-        Team intelligence for leadership teams
+        <RadarLogo dark />
+        <p style={{ fontSize: "var(--font-size-sm)", color: "var(--text-muted)", margin: 0 }}>
+          Team intelligence for leadership teams
+        </p>
+        <div style={{ display: "flex", gap: "20px" }}>
+          {["Privacy", "Terms", "Contact"].map((link) => (
+            <a
+              key={link}
+              href="#"
+              style={{
+                fontSize: "var(--font-size-sm)",
+                color: "var(--text-muted)",
+                textDecoration: "none",
+              }}
+            >
+              {link}
+            </a>
+          ))}
+        </div>
       </footer>
     </div>
   );

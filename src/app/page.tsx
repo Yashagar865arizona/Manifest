@@ -308,6 +308,43 @@ export default async function HomePage() {
             </span>
           </div>
 
+          {/* Center nav links */}
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {[
+              { label: "How it works", href: "#how-it-works" },
+              { label: "Features", href: "#features" },
+              { label: "Pricing", href: "#pricing" },
+            ].map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  color: "#64748B",
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                }}
+              >
+                {label}
+              </a>
+            ))}
+            <a
+              href="/demo"
+              style={{
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#94A3B8",
+                textDecoration: "none",
+                padding: "6px 12px",
+                borderRadius: "6px",
+              }}
+            >
+              Demo
+            </a>
+          </div>
+
           {/* Right nav */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <a
@@ -354,7 +391,7 @@ export default async function HomePage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "120px 24px 80px",
+          padding: "90px 24px 60px",
           overflow: "hidden",
         }}
       >
@@ -480,11 +517,38 @@ export default async function HomePage() {
             <div id="waitlist" style={{ width: "100%", maxWidth: "520px" }}>
               <WaitlistForm />
             </div>
+            <p style={{ fontSize: "0.75rem", color: "#334155", margin: "8px 0 0", textAlign: "center" }}>
+              No spam. We respect your{" "}
+              <a href="/privacy" style={{ color: "#475569", textDecoration: "underline" }}>privacy</a>.
+            </p>
             <p style={{ fontSize: "0.8125rem", color: "#475569", margin: 0 }}>
               Joined by{" "}
               <strong style={{ color: "#64748B" }}>{displayCount} engineering leaders</strong>.
               {" "}Free during beta.
             </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center", marginTop: "8px" }}>
+              <a
+                href="/demo"
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#64748B",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px",
+                  background: "rgba(255,255,255,0.03)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+                </svg>
+                See live demo
+              </a>
+            </div>
           </div>
 
           {/* Integration logos row */}
@@ -854,6 +918,7 @@ export default async function HomePage() {
 
       {/* ── HOW IT WORKS ───────────────────────────────────────────────── */}
       <section
+        id="how-it-works"
         style={{
           padding: "100px 24px",
           maxWidth: "var(--content-max-width)",
@@ -903,21 +968,36 @@ export default async function HomePage() {
           {[
             {
               step: "01",
-              icon: "🔌",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+              ),
               title: "Connect your tools",
               desc: "One-click OAuth with GitHub, Slack, Jira, and Google Calendar. No API keys. No scripts. No engineering required.",
               accent: "#3B82F6",
             },
             {
               step: "02",
-              icon: "👁️",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              ),
               title: "Radar watches silently",
               desc: "Analyzes 50+ behavioral signals across your connected tools. Builds individual baselines. Identifies deviation patterns in real time.",
               accent: "#8B5CF6",
             },
             {
               step: "03",
-              icon: "🎯",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              ),
               title: "Exceptions surface to you",
               desc: "Only the signals that need your attention reach your dashboard or inbox. Nothing else. No daily reports to check.",
               accent: "#06B6D4",
@@ -960,7 +1040,7 @@ export default async function HomePage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "1.375rem",
+                    color: step.accent,
                     marginBottom: "20px",
                   }}
                 >
@@ -998,6 +1078,7 @@ export default async function HomePage() {
 
       {/* ── FEATURES ───────────────────────────────────────────────────── */}
       <section
+        id="features"
         style={{
           padding: "100px 24px",
           maxWidth: "var(--content-max-width)",
@@ -1142,6 +1223,7 @@ export default async function HomePage() {
 
       {/* ── PRICING ────────────────────────────────────────────────────── */}
       <section
+        id="pricing"
         style={{
           padding: "100px 24px",
           maxWidth: "var(--content-max-width)",
@@ -1334,6 +1416,7 @@ export default async function HomePage() {
 
       {/* ── FAQ ────────────────────────────────────────────────────────── */}
       <section
+        id="faq"
         style={{
           padding: "100px 24px",
           maxWidth: "800px",
@@ -1441,6 +1524,10 @@ export default async function HomePage() {
               >
                 <WaitlistForm />
               </div>
+              <p style={{ marginTop: "12px", fontSize: "0.75rem", color: "#475569", textAlign: "center" }}>
+                No spam. We respect your{" "}
+                <a href="/privacy" style={{ color: "#64748B", textDecoration: "underline" }}>privacy</a>.
+              </p>
 
               <p
                 style={{
@@ -1500,10 +1587,14 @@ export default async function HomePage() {
 
           {/* Links */}
           <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-            {["Privacy", "Terms", "Contact"].map((link) => (
+            {[
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
+              { label: "Contact", href: "mailto:hello@radariq.io" },
+            ].map(({ label, href }) => (
               <a
-                key={link}
-                href="#"
+                key={label}
+                href={href}
                 style={{
                   fontSize: "0.875rem",
                   color: "#475569",
@@ -1511,7 +1602,7 @@ export default async function HomePage() {
                   transition: "color 0.15s",
                 }}
               >
-                {link}
+                {label}
               </a>
             ))}
           </div>
